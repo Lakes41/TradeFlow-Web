@@ -2,9 +2,11 @@
 import { useState } from "react";
 import { connectWallet } from "../lib/stellar";
 import Button from "./ui/Button";
+import { useTokenStore } from "../stores/tokenStore";
 
 export default function ConnectWallet() {
       const [pubKey, setPubKey] = useState<string | null>(null);
+      const { setConnected } = useTokenStore();
 
       const handleConnect = async () => {
             try {
@@ -12,6 +14,7 @@ export default function ConnectWallet() {
                   const userInfo = await connectWallet();
                   if (userInfo.publicKey) {
                         setPubKey(userInfo.publicKey);
+                        setConnected(true, userInfo.publicKey);
                   }
             } catch (e: any) {
                   console.error("Connection error:", e);
