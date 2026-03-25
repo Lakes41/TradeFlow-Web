@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
 import { ChevronDown, Search, X } from "lucide-react";
 import { useDebounce } from "../hooks/useDebounce";
+import { useRecentTokens } from "../hooks/useRecentTokens";
 
 interface TokenDropdownProps {
   onTokenChange?: (token: string) => void;
@@ -12,6 +13,7 @@ export default function TokenDropdown({ onTokenChange }: TokenDropdownProps) {
   const [searchInput, setSearchInput] = useState("");
   const dropdownRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const { recentTokens, addRecentToken } = useRecentTokens();
 
   // Debounce the search input with 300ms delay
   const debouncedSearch = useDebounce(searchInput, 300);
@@ -49,6 +51,7 @@ export default function TokenDropdown({ onTokenChange }: TokenDropdownProps) {
 
   const handleTokenSelect = (token: string) => {
     setSelectedToken(token);
+    addRecentToken(token);
     setIsOpen(false);
     if (onTokenChange) {
       onTokenChange(token);
@@ -102,6 +105,29 @@ export default function TokenDropdown({ onTokenChange }: TokenDropdownProps) {
           {/* Token List */}
           {filteredTokens.length > 0 ? (
             <div className="max-h-48 overflow-y-auto">
+              {/* Recent Tokens Section */}
+              {searchInput === "" && recentTokens.length > 0 && (
+                <>
+                  <div className="px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider bg-slate-800/95 sticky top-0 z-10 backdrop-blur-sm">
+                    Recent
+                  </div>
+                  {recentTokens.map((token) => (
+                    <button
+                      key={`recent-${token}`}
+                      onClick={() => handleTokenSelect(token)}
+                      className="w-full text-left px-4 py-2 transition-colors flex items-center justify-between hover:bg-slate-700 text-white"
+                    >
+                      <span className="font-medium">{token}</span>
+                      {token === selectedToken && (
+                        <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
+                      )}
+                    </button>
+                  ))}
+                  <div className="px-4 py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider bg-slate-800/95 sticky top-0 z-10 backdrop-blur-sm border-t border-slate-700/50">
+                    All Tokens
+                  </div>
+                </>
+              )}
               {filteredTokens.map((token) => (
                 <button
                   key={token}
