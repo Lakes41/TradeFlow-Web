@@ -75,7 +75,7 @@ export default function SwapInterface() {
   };
 
   // Main Swap Handler with Toast
-  const handleSwapClick = async () => {
+    const handleSwapClick = async () => {
     if (!fromAmount || parseFloat(fromAmount) <= 0) {
       toast.error("Please enter an amount to swap");
       return;
@@ -106,7 +106,7 @@ export default function SwapInterface() {
       });
     }
   };
-
+  
   const handleHighSlippageConfirm = async () => {
     const loadingToast = toast.loading("Processing high slippage swap...");
 
