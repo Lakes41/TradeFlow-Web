@@ -23,7 +23,7 @@ export default function ConnectWallet() {
       };
 
       return (
-            <div className="p-4">
+            <div>
                   <Button
                         onClick={() => handleConnect(FREIGHTER_ID)}
                         className="bg-purple-600 hover:bg-purple-700 shadow-lg flex items-center gap-2 px-6 py-3"
