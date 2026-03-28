@@ -1,10 +1,1 @@
-{
-  "/_not-found/page": "app/_not-found/page.js",
-  "/api/pnl/route": "app/api/pnl/route.js",
-  "/api/v1/network/fees/route": "app/api/v1/network/fees/route.js",
-  "/faq/page": "app/faq/page.js",
-  "/api/upload/route": "app/api/upload/route.js",
-  "/page": "app/page.js",
-  "/pools/page": "app/pools/page.js",
-  "/portfolio/page": "app/portfolio/page.js"
-}
+{}

@@ -7,8 +7,8 @@ import { Wallet, Copy, Check, CreditCard } from "lucide-react";
 import toast from "react-hot-toast";
 
 // Corrected imports based on your actual file structure
-import NetworkSelector from "../NetworkSelector";
-import FiatOnRampModal from "../FiatOnRampModal";
+import NetworkSelector from "./NetworkSelector";
+import FiatOnRampModal from "./FiatOnRampModal";
 import NetworkFeeIndicator from "./ui/NetworkFeeIndicator";
 
 interface NavbarProps {
