@@ -144,15 +144,15 @@ export default function SwapInterface() {
     setIsTradeReviewOpen(false);
     setIsSubmitting(true);
     setSubmissionStartTime(Date.now());
-    
+
     try {
       // Simulate transaction submission
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
+
       // Generate mock transaction XDR
       const mockTransactionXDR = "AAAAAK/eFzA7Jf5Xf3Xf3Xf3Xf3Xf3Xf3Xf3Xf3Xf3Xf3Xf3Xf3Xf3Xf3Xf3Xf3XAAAABQAAAAAAAAAAA==";
       console.log("Mock XDR generated:", mockTransactionXDR);
-      
+
       setIsTransactionSignatureOpen(true);
     } catch (error) {
       toast.error("Failed to submit trade");
@@ -204,6 +204,29 @@ export default function SwapInterface() {
 
   // Check if swap is valid
   const isSwapValid = fromAmount && parseFloat(fromAmount) > 0 && !isSubmitting;
+
+  // Check if user has insufficient balance
+  const hasInsufficientBalance = fromAmount && parseFloat(fromAmount) > 0 && parseFloat(fromAmount) > parseFloat(fromBalance);
+
+  // Get button text and disabled state
+  const getButtonState = () => {
+    if (isSubmitting) {
+      return { disabled: true, text: "Confirming (" + timeLeft + ")", className: "bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed" };
+    }
+    if (hasInsufficientBalance) {
+      return {
+        disabled: true,
+        text: `Insufficient ${fromToken} Balance`,
+        className: "bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+      };
+    }
+    if (!fromAmount || parseFloat(fromAmount) <= 0) {
+      return { disabled: true, text: "Enter Amount", className: "bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed" };
+    }
+    return { disabled: false, text: "Swap Tokens", className: "bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed" };
+  };
+
+  const buttonState = getButtonState();
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -289,8 +312,8 @@ export default function SwapInterface() {
         {/* Swap Button */}
         <button
           onClick={handleSwapClick}
-          disabled={isSubmitting}
-          className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-blue-500 py-3 mb-6"
+          disabled={buttonState.disabled}
+          className={`w-full flex items-center justify-center gap-2 ${buttonState.className} text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-blue-500 py-3 mb-6`}
         >
           {isSubmitting ? (
             <>
@@ -306,7 +329,7 @@ export default function SwapInterface() {
               <span>Confirming ({timeLeft})</span>
             </>
           ) : (
-            "Swap Tokens"
+            buttonState.text
           )}
         </button>
 
