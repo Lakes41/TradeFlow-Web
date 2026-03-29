@@ -1,41 +1,33 @@
 import React from 'react';
+import { ChevronDown } from 'lucide-react';
 
 interface TokenInputProps {
+  label: string;
   value: string;
-  onChange: (value: string) => void;
-  balance: string;
-  placeholder?: string;
+  tokenSymbol: string;
+  onSelectClick: () => void;
 }
 
-/**
- * A numerical input component for tokens featuring a "Max" button to 
- * quickly populate the user's full balance.
- */
-const TokenInput: React.FC<TokenInputProps> = ({ value, onChange, balance, placeholder = "0.0" }) => {
+export const TokenInput: React.FC<TokenInputProps> = ({ label, value, tokenSymbol, onSelectClick }) => {
   return (
-    <div className="relative flex items-center w-full">
-      <input
-        type="text"
-        inputMode="decimal"
-        value={value}
-        onChange={(e) => {
-          const val = e.target.value;
-          if (val === '' || /^[0-9]*\.?[0-9]*$/.test(val)) {
-            onChange(val);
-          }
-        }}
-        placeholder={placeholder}
-        className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 pr-14 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
-      />
-      <button
-        type="button"
-        onClick={() => onChange(balance)}
-        className="absolute right-3 text-xs font-bold text-cyan-400 hover:text-cyan-300 transition-colors bg-cyan-400/10 px-1.5 py-0.5 rounded cursor-pointer"
-      >
-        MAX
-      </button>
+    <div className="rounded-2xl bg-gray-50 p-4 border border-transparent focus-within:border-blue-500/30 transition-all">
+      <label className="text-xs font-medium text-gray-500 mb-2 block uppercase tracking-wider">{label}</label>
+      <div className="flex items-center justify-between gap-4">
+        <input
+          type="number"
+          value={value}
+          placeholder="0.00"
+          className="w-full bg-transparent text-3xl font-semibold outline-none text-gray-900"
+        />
+        {/* Token Selection Button - min-h-[44px] for mobile tap targets (#103) */}
+        <button
+          onClick={onSelectClick}
+          className="flex min-h-[44px] items-center gap-2 rounded-xl bg-white px-4 py-1 shadow-sm border border-gray-100 hover:bg-gray-50 transition-colors active:scale-95"
+        >
+          <span className="font-bold text-gray-900">{tokenSymbol}</span>
+          <ChevronDown size={18} className="text-gray-400" />
+        </button>
+      </div>
     </div>
   );
 };
-
-export default TokenInput;
