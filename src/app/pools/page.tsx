@@ -5,6 +5,7 @@ import { Plus, TrendingUp, DollarSign, Percent } from "lucide-react";
 import Navbar from "../../../Navbar";
 import { useWatchlist } from "../../hooks/useWatchlist";
 import StarIcon from "../../components/StarIcon";
+import AnimatedCounter from "../../components/AnimatedCounter";
 
 interface LiquidityPool {
   id: string;
@@ -86,7 +87,9 @@ export default function PoolsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-tradeflow-muted text-sm mb-1">Total TVL</p>
-                <p className="text-2xl font-bold">$8,505,000</p>
+                <p className="text-2xl font-bold">
+                  <AnimatedCounter end={8505000} duration={1.5} prefix="$" />
+                </p>
               </div>
               <DollarSign className="text-tradeflow-accent" size={24} />
             </div>
@@ -96,7 +99,9 @@ export default function PoolsPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-tradeflow-muted text-sm mb-1">24h Volume</p>
-                <p className="text-2xl font-bold">$701,000</p>
+                <p className="text-2xl font-bold">
+                  <AnimatedCounter end={701000} duration={1.5} prefix="$" />
+                </p>
               </div>
               <TrendingUp className="text-green-400" size={24} />
             </div>
