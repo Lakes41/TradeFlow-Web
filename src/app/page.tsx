@@ -35,9 +35,10 @@ export default function Page() {
         setAddress(userInfo.publicKey);
         console.log("Wallet connected:", userInfo.publicKey, "Type:", userInfo.walletType);
       }
-    } catch (e: any) {
-      console.error("Connection failed:", e.message);
-      alert(e.message || "Failed to connect to wallet.");
+    } catch (e: unknown) {
+      const error = e as Error;
+      console.error("Connection failed:", error.message);
+      alert(error.message || "Failed to connect to wallet.");
     }
   };
 
@@ -66,7 +67,7 @@ export default function Page() {
     toast.error();
   };
 
-  const handleInvoiceMint = (data: any) => {
+  const handleInvoiceMint = (data: Record<string, unknown>) => {
     console.log("Invoice data received:", data);
     setShowMintForm(false);
     // TODO: Chain integration will be handled separately
@@ -184,7 +185,7 @@ export default function Page() {
                       <SkeletonRow key={`skeleton-${index}`} />
                     ))
                   ) : (
-                    invoices.map((inv: any) => (
+                    invoices.map((inv: { id: string; riskScore: number; status: string; amount: number | string }) => (
                       <tr
                         key={inv.id}
                         className="border-b border-tradeflow-muted/50 hover:bg-tradeflow-muted/20 transition"

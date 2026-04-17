@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   // Bypassing Sentry middleware wrapper to rule out initialization hangs
   return NextResponse.next();
 }

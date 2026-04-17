@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build --no-lint",
+    "build": "next build --webpack",
     "start": "next start",
     "lint": "next lint"
   },
@@ -12,18 +12,20 @@
     "@creit.tech/stellar-wallets-kit": "^1.2.0",
     "@hookform/resolvers": "^5.2.2",
     "@pinata/sdk": "^2.1.0",
-    "@sentry/nextjs": "^8.0.0",
+    "@sentry/nextjs": "^10.49.0",
     "@stellar/freighter-api": "^1.7.1",
     "@tailwindcss/postcss": "^4.0.0",
+    "axios": "^1.15.0",
     "clsx": "^2.1.1",
     "is-callable": "^1.2.7",
     "lightweight-charts": "^5.1.0",
     "lucide-react": "^0.300.0",
-    "next": "^14.2.35",
-    "react": "^18",
+    "next": "^16.2.4",
+    "protobufjs": "^8.0.1",
+    "react": "^19.2.5",
     "react-confetti": "^6.4.0",
     "react-countup": "^6.5.3",
-    "react-dom": "^18",
+    "react-dom": "^19.2.5",
     "react-hook-form": "^7.71.2",
     "react-hot-toast": "^2.6.0",
     "recharts": "^3.7.0",
@@ -41,7 +43,7 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "eslint": "^8.57.0",
-    "eslint-config-next": "^14.2.35",
+    "eslint-config-next": "^16.2.4",
     "typescript": "^5"
   }
 }

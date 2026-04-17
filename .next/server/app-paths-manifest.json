@@ -1,9 +1,10 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
+  "/_global-error/page": "app/_global-error/page.js",
   "/api/pnl/route": "app/api/pnl/route.js",
-  "/faq/page": "app/faq/page.js",
-  "/api/v1/network/fees/route": "app/api/v1/network/fees/route.js",
   "/api/upload/route": "app/api/upload/route.js",
+  "/api/v1/network/fees/route": "app/api/v1/network/fees/route.js",
+  "/faq/page": "app/faq/page.js",
   "/legal/terms/page": "app/legal/terms/page.js",
   "/metrics-demo/page": "app/metrics-demo/page.js",
   "/page": "app/page.js",
