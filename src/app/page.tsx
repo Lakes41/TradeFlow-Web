@@ -17,10 +17,12 @@ import WatchlistTab from "../components/WatchlistTab";
 import TabNavigation from "../components/TabNavigation";
 import { useWatchlist } from "../hooks/useWatchlist";
 import StarIcon from "../components/StarIcon";
+import { api } from "../lib/api";
+import type { InvoiceSummary } from "../../types/api";
 
 export default function Page() {
   const [address, setAddress] = useState("");
-  const [invoices, setInvoices] = useState([]);
+  const [invoices, setInvoices] = useState<InvoiceSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [showMintForm, setShowMintForm] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -42,22 +44,28 @@ export default function Page() {
     }
   };
 
-  // 2. Fetch Invoices from your Repo 2 API
-  const fetchInvoices = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("http://localhost:3000/invoices");
-      const data = await res.json();
-      setInvoices(data);
-    } catch (e) {
-      console.error("API not running");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchInvoices = async () => {
+      setLoading(true);
+      try {
+        const res = await api.getInvoices({ signal: controller.signal });
+        if (res.ok) {
+          setInvoices(res.data);
+        } else {
+          console.error("Failed to fetch invoices:", res.error.message);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchInvoices();
+
+    return () => {
+      controller.abort();
+    };
   }, []);
   const toast = useTransactionToast();
 
@@ -185,7 +193,7 @@ export default function Page() {
                       <SkeletonRow key={`skeleton-${index}`} />
                     ))
                   ) : (
-                    invoices.map((inv: { id: string; riskScore: number; status: string; amount: number | string }) => (
+                    invoices.map((inv) => (
                       <tr
                         key={inv.id}
                         className="border-b border-tradeflow-muted/50 hover:bg-tradeflow-muted/20 transition"

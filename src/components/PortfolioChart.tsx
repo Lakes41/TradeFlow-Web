@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
   TooltipProps
 } from "recharts";
+import { api } from "../lib/api";
 
 interface PnLData {
   date: string;
@@ -47,6 +48,9 @@ export default function PortfolioChart() {
 
   // Generate dummy data for the last 30 days
   useEffect(() => {
+    const controller = new AbortController();
+    let didLoadRemote = false;
+
     const generateDummyData = () => {
       const data: PnLData[] = [];
       const today = new Date();
@@ -72,26 +76,27 @@ export default function PortfolioChart() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Try to fetch from backend first
-        const response = await fetch('http://localhost:3000/api/pnl');
+        const response = await api.getPnl({ signal: controller.signal });
         if (response.ok) {
-          const backendData = await response.json();
-          setData(backendData);
-        } else {
-          // Fallback to dummy data
+          setData(response.data);
+          didLoadRemote = true;
+        }
+      } catch {
+        // Fallback to dummy data if backend is not available
+      } finally {
+        if (!didLoadRemote) {
           const dummyData = generateDummyData();
           setData(dummyData);
         }
-      } catch (error) {
-        // Fallback to dummy data if backend is not available
-        const dummyData = generateDummyData();
-        setData(dummyData);
-      } finally {
         setLoading(false);
       }
     };
 
     fetchData();
+
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   // Determine if overall trend is positive or negative

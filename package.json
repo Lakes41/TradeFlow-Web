@@ -3,10 +3,13 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build --webpack",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "node ./node_modules/next/dist/bin/next dev",
+    "build": "node ./node_modules/next/dist/bin/next build --webpack",
+    "start": "node ./node_modules/next/dist/bin/next start",
+    "lint": "node ./node_modules/eslint/bin/eslint.js .",
+    "typecheck": "node ./node_modules/typescript/bin/tsc -p tsconfig.json --noEmit",
+    "test": "node ./node_modules/jest/bin/jest.js",
+    "test:watch": "node ./node_modules/jest/bin/jest.js --watch"
   },
   "dependencies": {
     "@creit.tech/stellar-wallets-kit": "^1.2.0",
@@ -19,7 +22,7 @@
     "clsx": "^2.1.1",
     "is-callable": "^1.2.7",
     "lightweight-charts": "^5.1.0",
-    "lucide-react": "^0.300.0",
+    "lucide-react": "^0.562.0",
     "next": "^16.2.4",
     "protobufjs": "^8.0.1",
     "react": "^19.2.5",
@@ -42,8 +45,10 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^20",
     "@types/react": "^18",
-    "eslint": "^8.57.0",
+    "eslint": "^9.0.0",
     "eslint-config-next": "^16.2.4",
+    "jest": "^30.1.3",
+    "jest-environment-jsdom": "^30.1.2",
     "typescript": "^5"
   },
   "overrides": {
