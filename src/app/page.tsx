@@ -6,6 +6,7 @@ import { PlusCircle, ShieldCheck, Landmark, Star } from "lucide-react";
 import LoanTable from "../components/LoanTable";
 import SkeletonRow from "../components/SkeletonRow";
 import Navbar from "../components/Navbar";
+import StickyHeader from "../components/StickyHeader";
 import Card from "../components/Card";
 import WalletModal from "../components/WalletModal";
 import InvoiceMintForm from "../components/InvoiceMintForm";
@@ -79,18 +80,15 @@ export default function Page() {
   ];
 
   return (
-    <div className="min-h-screen bg-tradeflow-dark text-white font-sans flex flex-col">
-      {/* News Banner */}
-      <NewsBanner />
-
-      {/* Header */}
-      <Navbar
-        address={address}
-        onConnect={() => setIsModalOpen(true)}
+    <div className="min-h-screen bg-tradeflow-dark text-white font-sans">
+      {/* Sticky Header */}
+      <StickyHeader
+        title="Marketplace"
+        subtitle="Trade and manage Real World Asset tokens"
       />
 
       {/* Main Content */}
-      <div className="flex-1 px-8">
+      <div className="px-4 lg:px-8 py-6">
         {/* Tab Navigation */}
         <TabNavigation
           tabs={tabs}
