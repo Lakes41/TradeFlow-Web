@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { connectWallet, WalletType } from "../lib/stellar";
 import { PlusCircle, ShieldCheck, Landmark, Star } from "lucide-react";
 import LoanTable from "../components/LoanTable";
@@ -17,15 +17,19 @@ import WatchlistTab from "../components/WatchlistTab";
 import TabNavigation from "../components/TabNavigation";
 import { useWatchlist } from "../hooks/useWatchlist";
 import StarIcon from "../components/StarIcon";
+import { api } from "../lib/api";
+import type { InvoiceSummary } from "../../types/api";
+import { RiskSocketClient } from "../lib/riskSocket";
 
 export default function Page() {
   const [address, setAddress] = useState("");
-  const [invoices, setInvoices] = useState([]);
+  const [invoices, setInvoices] = useState<InvoiceSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [showMintForm, setShowMintForm] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
   const { toggleWatchlist, isInWatchlist } = useWatchlist();
+  const riskSocketRef = useRef<RiskSocketClient | null>(null);
 
   // 1. Connect Stellar Wallet (supports Freighter, Albedo, xBull)
   const handleConnectWallet = async (walletType: WalletType) => {
@@ -42,23 +46,65 @@ export default function Page() {
     }
   };
 
-  // 2. Fetch Invoices from your Repo 2 API
-  const fetchInvoices = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("http://localhost:3000/invoices");
-      const data = await res.json();
-      setInvoices(data);
-    } catch (e) {
-      console.error("API not running");
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const fetchInvoices = async () => {
+      setLoading(true);
+      try {
+        const res = await api.getInvoices({ signal: controller.signal });
+        if (res.ok) {
+          setInvoices(res.data);
+        } else {
+          console.error("Failed to fetch invoices:", res.error.message);
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchInvoices();
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
 
   useEffect(() => {
-    fetchInvoices();
-  }, []);
+    if (!address) {
+      riskSocketRef.current?.disconnect();
+      riskSocketRef.current = null;
+      return;
+    }
+
+    const socketClient = riskSocketRef.current ?? new RiskSocketClient();
+    riskSocketRef.current = socketClient;
+    socketClient.connect();
+
+    const unsubscribe = socketClient.on((event) => {
+      if (event.event !== "risk_update") return;
+      const { invoiceId, riskScore } = event.data;
+
+      setInvoices((prev) =>
+        prev.map((inv) => (inv.id === invoiceId ? { ...inv, riskScore } : inv)),
+      );
+    });
+
+    return () => {
+      unsubscribe();
+      socketClient.disconnect();
+      if (riskSocketRef.current === socketClient) {
+        riskSocketRef.current = null;
+      }
+    };
+  }, [address]);
+
+  useEffect(() => {
+    if (!address) return;
+    if (invoices.length === 0) return;
+
+    riskSocketRef.current?.syncInvoices(invoices.map((i) => i.id));
+  }, [address, invoices]);
   const toast = useTransactionToast();
 
   const handleTestToast = () => {
@@ -185,7 +231,7 @@ export default function Page() {
                       <SkeletonRow key={`skeleton-${index}`} />
                     ))
                   ) : (
-                    invoices.map((inv: { id: string; riskScore: number; status: string; amount: number | string }) => (
+                    invoices.map((inv) => (
                       <tr
                         key={inv.id}
                         className="border-b border-tradeflow-muted/50 hover:bg-tradeflow-muted/20 transition"

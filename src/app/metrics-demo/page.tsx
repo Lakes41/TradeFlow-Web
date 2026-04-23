@@ -1,8 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import DataMetric from "../../components/ui/DataMetric";
 import Navbar from "../../components/Navbar";
+import { api } from "../../lib/api";
+import { RiskSocketClient } from "../../lib/riskSocket";
 
 const metrics = [
   { title: "Total Volume (24h)", value: "$4,821,093", trend: "+12.4%" },
@@ -16,6 +18,67 @@ const metrics = [
 ];
 
 export default function MetricsDemoPage() {
+  const [healthValue, setHealthValue] = useState<string>("Loading...");
+  const [healthTrend, setHealthTrend] = useState<string | undefined>(undefined);
+  const [riskValue, setRiskValue] = useState<string>("Loading...");
+  const [riskTrend, setRiskTrend] = useState<string | undefined>(undefined);
+  const [apiError, setApiError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    const run = async () => {
+      setApiError(null);
+
+      const healthRes = await api.getHealth({ signal: controller.signal });
+      if (healthRes.ok) {
+        console.log("[api] /health success", healthRes.data);
+        setHealthValue(healthRes.data.status);
+        setHealthTrend(`HTTP ${healthRes.status}`);
+      } else {
+        setHealthValue("error");
+        setHealthTrend(healthRes.status ? `HTTP ${healthRes.status}` : undefined);
+        setApiError(healthRes.error.message);
+      }
+
+      const riskRes = await api.getRiskScore("INV-DEMO-001", { signal: controller.signal });
+      if (riskRes.ok) {
+        console.log("[api] /v1/risk success", riskRes.data);
+        setRiskValue(String(riskRes.data.riskScore));
+        setRiskTrend(`invoiceId=${riskRes.data.invoiceId}`);
+      } else {
+        setRiskValue("error");
+        setRiskTrend(riskRes.status ? `HTTP ${riskRes.status}` : undefined);
+        setApiError((prev) => prev || riskRes.error.message);
+      }
+    };
+
+    run();
+
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
+  useEffect(() => {
+    const socketClient = new RiskSocketClient();
+    socketClient.connect();
+    socketClient.subscribeInvoice("INV-DEMO-001");
+
+    const unsubscribe = socketClient.on((event) => {
+      if (event.event !== "risk_update") return;
+      if (event.data.invoiceId !== "INV-DEMO-001") return;
+      console.log("[ws] risk_update", event.data);
+      setRiskValue(String(event.data.riskScore));
+      setRiskTrend(`invoiceId=${event.data.invoiceId}`);
+    });
+
+    return () => {
+      unsubscribe();
+      socketClient.disconnect();
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-tradeflow-dark text-white font-sans flex flex-col">
       <Navbar address="" onConnect={() => {}} />
@@ -45,6 +108,17 @@ export default function MetricsDemoPage() {
                 trend={m.trend}
               />
             ))}
+          </div>
+        </section>
+
+        <section className="mb-10">
+          <h2 className="text-lg font-semibold text-slate-300 mb-4">
+            API Connectivity
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <DataMetric title="Health Status" value={healthValue} trend={healthTrend} />
+            <DataMetric title="Risk Score (Demo)" value={riskValue} trend={riskTrend} />
+            <DataMetric title="API Error" value={apiError || "None"} />
           </div>
         </section>
 

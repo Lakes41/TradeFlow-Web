@@ -1,56 +1,188 @@
-import axios, { type InternalAxiosRequestConfig } from 'axios';
+import type {
+  ApiResult,
+  ApiStatusCode,
+  GetRiskScoreParams,
+  HealthResponse,
+  InvoicesResponse,
+  PnlResponse,
+  RiskScoreResponse,
+} from "../../types/api";
+import {
+  isHealthResponse,
+  isInvoicesResponse,
+  isPnlResponse,
+  isRiskScoreResponse,
+} from "../../types/api";
+import { httpClient, normalizeHttpError } from "./httpClient";
+
+function toHeadersRecord(headers: any): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (!headers) return out;
+  for (const [key, value] of Object.entries(headers)) {
+    if (Array.isArray(value)) out[key] = value.join(", ");
+    else if (typeof value === "string") out[key] = value;
+    else if (typeof value === "number") out[key] = String(value);
+    else if (typeof value === "boolean") out[key] = value ? "true" : "false";
+  }
+  return out;
+}
+
+function asStatusCode(status: number): ApiStatusCode {
+  return status as ApiStatusCode;
+}
+
+function badRequest(message: string): ApiResult<never> {
+  return { ok: false, status: 400, error: { message } };
+}
+
+function isSafeInvoiceId(invoiceId: string): boolean {
+  if (!invoiceId) return false;
+  if (invoiceId.length > 128) return false;
+  return /^[a-zA-Z0-9._:-]+$/.test(invoiceId);
+}
+
+export interface RequestOptions {
+  signal?: AbortSignal;
+}
 
 /**
- * Retrieves the authentication token from storage.
- * This can be adapted to use sessionStorage, cookies, or any other storage mechanism.
- * @returns The token string or null if not found.
+ * Fetches API health data from GET /health.
+ *
+ * @returns ApiResult<HealthResponse> with standardized success/error formatting.
  */
-const getAuthToken = (): string | null => {
-  // This check ensures code doesn't break during Server-Side Rendering (SSR)
-  if (typeof window !== 'undefined') {
-    // You can replace 'authToken' with the key you use to store the JWT.
-    return localStorage.getItem('authToken');
+export async function getHealth(options: RequestOptions = {}): Promise<ApiResult<HealthResponse>> {
+  try {
+    const res = await httpClient.get("/health", { signal: options.signal });
+    const data: unknown = res.data;
+
+    if (!isHealthResponse(data)) {
+      return {
+        ok: false,
+        status: asStatusCode(res.status),
+        headers: toHeadersRecord(res.headers),
+        error: { message: "Invalid /health response shape", details: data },
+      };
+    }
+
+    return {
+      ok: true,
+      status: asStatusCode(res.status),
+      headers: toHeadersRecord(res.headers),
+      data,
+    };
+  } catch (error) {
+    const normalized = normalizeHttpError(error);
+    return { ok: false, ...normalized };
   }
-  return null;
+}
+
+/**
+ * Fetches a risk score for a given invoice ID from GET /v1/risk?invoiceId=...
+ *
+ * @param invoiceId - The invoice identifier used by the backend risk engine.
+ * @returns ApiResult<RiskScoreResponse> with standardized success/error formatting.
+ */
+export async function getRiskScore(
+  invoiceId: GetRiskScoreParams["invoiceId"],
+  options: RequestOptions = {},
+): Promise<ApiResult<RiskScoreResponse>> {
+  if (!isSafeInvoiceId(invoiceId)) {
+    return badRequest("Invalid invoiceId. Expected 1-128 chars: letters, numbers, . _ : -");
+  }
+
+  try {
+    const res = await httpClient.get("/v1/risk", {
+      signal: options.signal,
+      params: { invoiceId },
+    });
+    const data: unknown = res.data;
+
+    if (!isRiskScoreResponse(data)) {
+      return {
+        ok: false,
+        status: asStatusCode(res.status),
+        headers: toHeadersRecord(res.headers),
+        error: { message: "Invalid /v1/risk response shape", details: data },
+      };
+    }
+
+    return {
+      ok: true,
+      status: asStatusCode(res.status),
+      headers: toHeadersRecord(res.headers),
+      data,
+    };
+  } catch (error) {
+    const normalized = normalizeHttpError(error);
+    return { ok: false, ...normalized };
+  }
+}
+
+/**
+ * Fetches invoice summaries from GET /invoices.
+ *
+ * @returns ApiResult<InvoicesResponse> with standardized success/error formatting.
+ */
+export async function getInvoices(options: RequestOptions = {}): Promise<ApiResult<InvoicesResponse>> {
+  try {
+    const res = await httpClient.get("/invoices", { signal: options.signal });
+    const data: unknown = res.data;
+
+    if (!isInvoicesResponse(data)) {
+      return {
+        ok: false,
+        status: asStatusCode(res.status),
+        headers: toHeadersRecord(res.headers),
+        error: { message: "Invalid /invoices response shape", details: data },
+      };
+    }
+
+    return {
+      ok: true,
+      status: asStatusCode(res.status),
+      headers: toHeadersRecord(res.headers),
+      data,
+    };
+  } catch (error) {
+    const normalized = normalizeHttpError(error);
+    return { ok: false, ...normalized };
+  }
+}
+
+/**
+ * Fetches profit-and-loss chart data from GET /api/pnl.
+ *
+ * @returns ApiResult<PnlResponse> with standardized success/error formatting.
+ */
+export async function getPnl(options: RequestOptions = {}): Promise<ApiResult<PnlResponse>> {
+  try {
+    const res = await httpClient.get("/api/pnl", { signal: options.signal });
+    const data: unknown = res.data;
+
+    if (!isPnlResponse(data)) {
+      return {
+        ok: false,
+        status: asStatusCode(res.status),
+        headers: toHeadersRecord(res.headers),
+        error: { message: "Invalid /api/pnl response shape", details: data },
+      };
+    }
+
+    return {
+      ok: true,
+      status: asStatusCode(res.status),
+      headers: toHeadersRecord(res.headers),
+      data,
+    };
+  } catch (error) {
+    const normalized = normalizeHttpError(error);
+    return { ok: false, ...normalized };
+  }
+}
+
+export const api = {
+  getHealth,
+  getRiskScore,
+  getInvoices,
+  getPnl,
 };
-
-const apiClient = axios.create({
-  // It's a good practice to set a baseURL for your API.
-  // You can use environment variables for this.
-  baseURL: process.env.NEXT_PUBLIC_API_URL || '/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// Request interceptor to inject the authentication token into headers.
-apiClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    const token = getAuthToken();
-    if (token && config.headers) {
-      config.headers.set('Authorization', `Bearer ${token}`);
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
-// Response interceptor to handle 401 Unauthorized errors globally.
-apiClient.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (axios.isAxiosError(error) && error.response?.status === 401) {
-      if (typeof window !== 'undefined') {
-        // Clear the expired token from storage
-        localStorage.removeItem('authToken');
-        // Redirect to the connection/login flow
-        window.location.href = '/connect';
-      }
-    }
-    return Promise.reject(error);
-  }
-);
-
-export default apiClient;

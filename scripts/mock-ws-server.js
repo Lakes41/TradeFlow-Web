@@ -8,7 +8,6 @@ const wss = new WebSocket.Server({
 
 console.log('WebSocket server started on ws://127.0.0.1:3001');
 
-// Store subscriptions for each symbol
 const subscriptions = new Map();
 
 // Generate mock trade data
@@ -32,6 +31,18 @@ function generateTradeData(symbol) {
   };
 }
 
+function generateRiskUpdate(invoiceId) {
+  const riskScore = Math.max(0, Math.min(100, Math.round(40 + Math.random() * 55)));
+  return {
+    event: "risk_update",
+    data: {
+      invoiceId,
+      riskScore,
+      updatedAt: new Date().toISOString(),
+    },
+  };
+}
+
 // Handle new connections
 wss.on('connection', (ws) => {
   console.log('New client connected');
@@ -43,21 +54,40 @@ wss.on('connection', (ws) => {
     try {
       const data = JSON.parse(message);
 
-      if (data.type === 'subscribe' && data.payload.symbol) {
-        const symbol = data.payload.symbol;
-        clientSubscriptions.add(symbol);
+      if (data.type === 'subscribe') {
+        const symbol = data.payload && data.payload.symbol;
+        const room = data.payload && data.payload.room;
 
-        // Add to global subscriptions
-        if (!subscriptions.has(symbol)) {
-          subscriptions.set(symbol, new Set());
+        const topic = typeof room === 'string' ? room : symbol;
+        if (!topic) return;
+
+        clientSubscriptions.add(topic);
+        if (!subscriptions.has(topic)) subscriptions.set(topic, new Set());
+        subscriptions.get(topic).add(ws);
+
+        console.log(`Client subscribed to ${topic}`);
+
+        if (typeof symbol === 'string') {
+          ws.send(JSON.stringify(generateTradeData(symbol)));
+        } else if (typeof room === 'string') {
+          if (room.startsWith('invoice:')) {
+            const invoiceId = room.slice('invoice:'.length);
+            ws.send(JSON.stringify(generateRiskUpdate(invoiceId)));
+          } else if (room === 'risk:feed') {
+            ws.send(JSON.stringify(generateRiskUpdate('INV-DEMO-001')));
+          }
         }
-        subscriptions.get(symbol).add(ws);
+      } else if (data.type === 'unsubscribe') {
+        const room = data.payload && data.payload.room;
+        const symbol = data.payload && data.payload.symbol;
+        const topic = typeof room === 'string' ? room : symbol;
+        if (!topic) return;
 
-        console.log(`Client subscribed to ${symbol}`);
-
-        // Send initial data immediately
-        const initialData = generateTradeData(symbol);
-        ws.send(JSON.stringify(initialData));
+        clientSubscriptions.delete(topic);
+        if (subscriptions.has(topic)) {
+          subscriptions.get(topic).delete(ws);
+          if (subscriptions.get(topic).size === 0) subscriptions.delete(topic);
+        }
       }
     } catch (error) {
       console.error('Error parsing message:', error);
@@ -68,13 +98,10 @@ wss.on('connection', (ws) => {
     console.log('Client disconnected');
 
     // Remove client from all subscriptions
-    clientSubscriptions.forEach(symbol => {
-      if (subscriptions.has(symbol)) {
-        subscriptions.get(symbol).delete(ws);
-        if (subscriptions.get(symbol).size === 0) {
-          subscriptions.delete(symbol);
-        }
-      }
+    clientSubscriptions.forEach(topic => {
+      if (!subscriptions.has(topic)) return;
+      subscriptions.get(topic).delete(ws);
+      if (subscriptions.get(topic).size === 0) subscriptions.delete(topic);
     });
   });
 
@@ -85,13 +112,19 @@ wss.on('connection', (ws) => {
 
 // Broadcast live data to subscribed clients
 setInterval(() => {
-  subscriptions.forEach((clients, symbol) => {
-    const tradeData = generateTradeData(symbol);
+  subscriptions.forEach((clients, topic) => {
+    let payload;
+    if (typeof topic === 'string' && topic.startsWith('invoice:')) {
+      const invoiceId = topic.slice('invoice:'.length);
+      payload = generateRiskUpdate(invoiceId);
+    } else if (topic === 'risk:feed') {
+      payload = generateRiskUpdate('INV-DEMO-001');
+    } else {
+      payload = generateTradeData(topic);
+    }
 
     clients.forEach(client => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(tradeData));
-      }
+      if (client.readyState === WebSocket.OPEN) client.send(JSON.stringify(payload));
     });
   });
 }, 2000); // Send new data every 2 seconds
