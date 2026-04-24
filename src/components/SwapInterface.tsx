@@ -1,106 +1,16 @@
-"use client";
-
-import React, { useState, useEffect } from "react";
-import { ArrowUpDown, Settings, RefreshCw } from "lucide-react";
-import toast from "react-hot-toast";
+import React, { useState } from "react";
+import { ArrowUpDown, Settings, BarChart3, LineChart, TrendingUp } from "lucide-react";
 import TokenDropdown from "./TokenDropdown";
 import SettingsModal from "./SettingsModal";
-import HighSlippageWarning from "./HighSlippageWarning";
-import TransactionSignatureModal from "./TransactionSignatureModal";
-import { useSlippage } from "../contexts/SlippageContext";
-import TokenInput from "./TokenInput";
-import Card from "./Card";
-import Button from "./ui/Button";
-import Tooltip from "./ui/Tooltip";
-import TradeReviewModal from "./TradeReviewModal";
-import LivePriceChart from "./LivePriceChart";
-/* ISSUE #87: Import the new Success/Share modal */
-import TradeSuccessModal from "./TradeSuccessModal";
+import { useSettings } from "../lib/context/SettingsContext";
 
 export default function SwapInterface() {
   const [fromToken, setFromToken] = useState("XLM");
   const [toToken, setToToken] = useState("USDC");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isHighSlippageWarningOpen, setIsHighSlippageWarningOpen] = useState(false);
-  const [fromAmount, setFromAmount] = useState("");
-  const [toAmount, setToAmount] = useState("");
-  const [priceImpact, setPriceImpact] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isTradeReviewOpen, setIsTradeReviewOpen] = useState(false);
-  const [isTransactionSignatureOpen, setIsTransactionSignatureOpen] = useState(false);
-
-  /* ISSUE #87: State to manage the visibility of the growth/share modal */
-  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
-
-  const [submissionStartTime, setSubmissionStartTime] = useState<number | null>(null);
-  const [timeLeft, setTimeLeft] = useState<string>("");
-  const [fromBalance, setFromBalance] = useState("1240.50");
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const { slippageTolerance, transactionDeadline } = useSlippage();
-
-  const handleRefreshData = () => {
-    setIsRefreshing(true);
-    // Simulate network fetch
-    setTimeout(() => {
-      // Trigger a state update for mocked balances
-      const randomOffset = (Math.random() * 20 - 10).toFixed(2);
-      setFromBalance((prev) => (Math.max(0, parseFloat(prev) + parseFloat(randomOffset))).toFixed(2));
-      setIsRefreshing(false);
-    }, 1500);
-  };
-
-  // Countdown timer effect
-  useEffect(() => {
-    let interval: any;
-    if (isSubmitting && submissionStartTime) {
-      interval = setInterval(() => {
-        const now = Date.now();
-        const elapsed = Math.floor((now - submissionStartTime) / 1000);
-        const totalSeconds = transactionDeadline * 60;
-        const remaining = totalSeconds - elapsed;
-
-        if (remaining <= 0) {
-          clearInterval(interval);
-          setIsSubmitting(false);
-          setIsTransactionSignatureOpen(false);
-          setIsTradeReviewOpen(false);
-          setSubmissionStartTime(null);
-          toast.error("Transaction Expired", { duration: 5000 });
-        } else {
-          const minutes = Math.floor(remaining / 60);
-          const seconds = remaining % 60;
-          setTimeLeft(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
-        }
-      }, 1000);
-    }
-    return () => clearInterval(interval);
-  }, [isSubmitting, submissionStartTime, transactionDeadline]);
-
-  // Load saved token selections on mount
-  useEffect(() => {
-    const savedFromToken = localStorage.getItem('tradeflow-fromToken');
-    const savedToToken = localStorage.getItem('tradeflow-toToken');
-
-    if (savedFromToken) setFromToken(savedFromToken);
-    if (savedToToken) setToToken(savedToToken);
-  }, []);
-
-  // Save token selections to localStorage
-  useEffect(() => {
-    localStorage.setItem('tradeflow-fromToken', fromToken);
-  }, [fromToken]);
-
-  useEffect(() => {
-    localStorage.setItem('tradeflow-toToken', toToken);
-  }, [toToken]);
-
-  // Calculate price impact
-  const calculatePriceImpact = (amount: string) => {
-    if (!amount || parseFloat(amount) <= 0) return 0;
-    const baseImpact = Math.min(parseFloat(amount) * 0.01, 15);
-    const tokenMultiplier = fromToken === "XLM" ? 1.2 : 1.0;
-    return baseImpact * tokenMultiplier;
-  };
+  const [isProMode, setIsProMode] = useState(false);
+  
+  const { deadline } = useSettings();
 
   const handleSwap = () => {
     const temp = fromToken;
@@ -257,104 +167,115 @@ export default function SwapInterface() {
   }, [isAnyModalOpen, isSwapValid]);
 
   return (
-    <>
-      <div className="max-w-md mx-auto mb-6">
-        <LivePriceChart symbol={`${fromToken}/${toToken}`} height={300} />
-      </div>
+    <div className="w-full max-w-2xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      {/* Pro Mode Toggle */}
+      <div className="flex justify-between items-center bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 p-4 rounded-2xl">
+        <div className="flex items-center gap-3">
+          <div className={`p-2 rounded-xl ${isProMode ? "bg-blue-500/20 text-blue-400" : "bg-slate-700 text-slate-400"}`}>
+            <BarChart3 size={20} />
+          </div>
+          <div>
+            <h3 className="font-semibold text-white">Pro Mode</h3>
+            <p className="text-xs text-slate-400">Advanced charts & market data</p>
+          </div>
+        </div>
+        <button
+          onClick={() => setIsProMode(!isProMode)}
+          className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
+            isProMode ? "bg-blue-600" : "bg-slate-600"
+          }`}
+        >
+          <div
+            className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform duration-200 ${
+              isProMode ? "translate-x-6" : "translate-x-0"
+            }`}
+          />
+        </button>
 
-      <Card className="max-w-md mx-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold text-white">Swap Tokens</h2>
-          <div className="flex items-center gap-1 -mr-2">
-            <button
-              onClick={handleRefreshData}
-              disabled={isRefreshing}
-              className="text-slate-400 hover:text-white transition-all duration-300 p-2"
-              aria-label="Refresh Data"
-            >
-              <RefreshCw size={20} className={isRefreshing ? "animate-spin" : ""} />
-            </button>
-            <button
+      {/* Advanced Chart Area (Issue #83) */}
+      {isProMode && (
+        <div className="bg-slate-800 border border-slate-700 rounded-2xl p-8 flex flex-col items-center justify-center min-h-[300px] relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent pointer-events-none" />
+          <div className="relative z-10 flex flex-col items-center gap-4 text-center">
+            <div className="p-4 bg-blue-500/10 rounded-full text-blue-400 animate-pulse">
+              <TrendingUp size={32} />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-white mb-2">Advanced Chart Area</h3>
+              <p className="text-slate-400 max-w-md">
+                Real-time TradingView charts and liquidity depth analysis for professional traders.
+              </p>
+            </div>
+          </div>
+          {/* Decorative Grid */}
+          <div className="absolute bottom-0 left-0 w-full h-24 bg-[radial-gradient(circle_at_bottom,_var(--tw-gradient-stops))] from-blue-500/10 via-transparent to-transparent opacity-50" />
+        </div>
+      )}
+
+      {/* Main Swap Card */}
+      <div className="bg-slate-800 rounded-3xl border border-slate-700 p-1 shadow-2xl relative">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-white">Swap Tokens</h2>
+            <button 
               onClick={() => setIsSettingsOpen(true)}
-              className="text-slate-400 hover:text-white transition-all duration-300 hover:rotate-90 p-2"
+              className="p-2 hover:bg-slate-700 rounded-xl text-slate-400 hover:text-white transition-all transform hover:rotate-90"
             >
               <Settings size={20} />
             </button>
           </div>
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-sm text-slate-400 mb-2">From</label>
-          <div className="flex gap-3">
-            <TokenDropdown onTokenChange={setFromToken} />
-            <TokenInput
-              value={fromAmount}
-              onChange={handleFromAmountChange}
-              balance={fromBalance}
-              placeholder="0.00"
-            />
+          
+          {/* From Token */}
+          <div className="mb-2 bg-slate-900/50 p-4 rounded-2xl border border-slate-700/50">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">From</label>
+            <div className="flex gap-4 items-center">
+              <TokenDropdown onTokenChange={setFromToken} />
+              <input
+                type="number"
+                placeholder="0.00"
+                className="flex-1 bg-transparent text-2xl font-bold text-white placeholder-slate-600 focus:outline-none"
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="flex justify-center my-4">
-          <button
-            onClick={handleSwap}
-            className="bg-blue-600 hover:bg-blue-700 p-3 rounded-full transition-colors group"
-          >
-            <ArrowUpDown
-              size={20}
-              className="text-white transition-transform duration-200 hover:rotate-180"
-            />
+          {/* Swap Button */}
+          <div className="relative h-4 flex justify-center items-center z-10">
+            <button
+              onClick={handleSwap}
+              className="bg-blue-600 hover:bg-blue-500 p-3 rounded-2xl transition-all shadow-xl shadow-blue-900/40 border-4 border-slate-800 transform hover:scale-110 active:scale-95"
+            >
+              <ArrowUpDown size={20} className="text-white" />
+            </button>
+          </div>
+
+          {/* To Token */}
+          <div className="mb-6 bg-slate-900/50 p-4 rounded-2xl border border-slate-700/50">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">To</label>
+            <div className="flex gap-4 items-center">
+              <TokenDropdown onTokenChange={setToToken} />
+              <input
+                type="number"
+                placeholder="0.00"
+                className="flex-1 bg-transparent text-2xl font-bold text-white placeholder-slate-600 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          {/* Transaction Info (Issue #74) */}
+          <div className="flex justify-between items-center mb-6 px-2">
+            <div className="flex items-center gap-2 text-sm text-slate-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+              Optimal Routing
+            </div>
+            <div className="text-sm font-medium text-slate-300 bg-slate-700/50 px-3 py-1.5 rounded-lg border border-slate-600/50">
+              Deadline: <span className="text-blue-400">{deadline}m</span>
+            </div>
+          </div>
+
+          {/* Action Button */}
+          <button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-900/20 text-lg">
+            Swap Assets
           </button>
-        </div>
-
-        <div className="mb-6">
-          <label className="block text-sm text-slate-400 mb-2">To</label>
-          <div className="flex gap-3">
-            <TokenDropdown onTokenChange={setToToken} />
-            <input
-              type="number"
-              value={toAmount}
-              readOnly
-              placeholder="0.00"
-              className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
-            />
-          </div>
-        </div>
-
-        <button
-          onClick={handleSwapClick}
-          disabled={buttonState.disabled}
-          className={`w-full flex items-center justify-center gap-2 ${buttonState.className} text-white font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-slate-800 focus:ring-blue-500 py-3 mb-6`}
-        >
-          {isSubmitting ? (
-            <>
-              <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              <span>Confirming ({timeLeft})</span>
-            </>
-          ) : (
-            buttonState.text
-          )}
-        </button>
-
-        <div className="space-y-3 pt-4 border-t border-slate-700/50">
-          <div className="flex justify-between text-sm">
-            <Tooltip content="The estimated change in price due to the size of your trade.">
-              <span className="text-slate-400 underline decoration-dotted decoration-slate-600 cursor-help">Price Impact</span>
-            </Tooltip>
-            <span className={getPriceImpactColor()}>
-              {priceImpact.toFixed(2)}%
-            </span>
-          </div>
-          <div className="flex justify-between text-sm">
-            <Tooltip content="Slippage tolerance.">
-              <span className="text-slate-400 underline decoration-dotted decoration-slate-600 cursor-help">Slippage Tolerance</span>
-            </Tooltip>
-            <span className="text-slate-200">{slippageTolerance}%</span>
-          </div>
         </div>
       </Card>
 
@@ -391,11 +312,7 @@ export default function SwapInterface() {
         route={`${fromToken} → ${toToken}`}
       />
 
-      {/* ISSUE #87: Success modal with 'Share on X' button */}
-      <TradeSuccessModal
-        isOpen={isSuccessModalOpen}
-        onClose={() => setIsSuccessModalOpen(false)}
-      />
-    </>
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+    </div>
   );
 }
