@@ -2,6 +2,8 @@ import "./globals.css";
 import React from "react";
 import { Inter } from "next/font/google";
 import ToasterProvider from "../components/general/ToasterProvider";
+import { SettingsProvider } from "../lib/context/SettingsContext";
+import NetworkGuard from "../components/general/NetworkGuard";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -21,8 +23,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="font-sans">
-        {children}
-        <ToasterProvider />
+        <SettingsProvider>
+          <NetworkGuard>
+            {children}
+            <ToasterProvider />
+          </NetworkGuard>
+        </SettingsProvider>
       </body>
     </html>
   );

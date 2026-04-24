@@ -57,19 +57,28 @@ export default function Page() {
   return (
     <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col">
       {/* Header */}
-      <div className="flex justify-between items-center mb-12 p-8">
-        <h1 className="text-3xl font-bold tracking-tight">
-          TradeFlow <span className="text-blue-400">RWA</span>
-        </h1>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full transition"
-        >
-          <Wallet size={18} />
-          {address
-            ? `${address.slice(0, 6)}...${address.slice(-4)}`
-            : "Connect Wallet"}
-        </button>
+      <div className="flex justify-between items-center mb-12 p-8 border-b border-slate-800/50">
+        <div className="flex items-center gap-12">
+          <h1 className="text-3xl font-bold tracking-tight">
+            TradeFlow <span className="text-blue-400">RWA</span>
+          </h1>
+          <nav className="hidden md:flex items-center gap-8">
+            <a href="/" className="text-white font-medium hover:text-blue-400 transition-colors">Dashboard</a>
+            <a href="/swap" className="text-slate-400 font-medium hover:text-white transition-colors">Swap</a>
+            <a href="/pools" className="text-slate-400 font-medium hover:text-white transition-colors">Pools</a>
+          </nav>
+        </div>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full transition shadow-lg shadow-blue-900/20"
+          >
+            <Wallet size={18} />
+            {address
+              ? `${address.slice(0, 6)}...${address.slice(-4)}`
+              : "Connect Wallet"}
+          </button>
+        </div>
       </div>
 
       {/* Main Content */}
