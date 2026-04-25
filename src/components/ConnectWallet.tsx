@@ -4,12 +4,14 @@ import { connectWallet, WalletType, FREIGHTER_ID } from "../lib/stellar";
 import Button from "./ui/Button";
 import { useTokenStore } from "../stores/tokenStore";
 import { LogOut, ChevronDown } from "lucide-react";
+import WalletModal from "./WalletModal";
 
 const RECENT_TOKENS_KEY = "tradeflow_recent_tokens";
 
 export default function ConnectWallet() {
       const [pubKey, setPubKey] = useState<string | null>(null);
       const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+      const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
       const { setConnected } = useTokenStore();
       const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -24,7 +26,7 @@ export default function ConnectWallet() {
             return () => document.removeEventListener("mousedown", handleClickOutside);
       }, []);
 
-      const handleConnect = async (walletType: WalletType = FREIGHTER_ID) => {
+      const handleConnect = async (walletType: WalletType) => {
             try {
                   const userInfo = await connectWallet(walletType);
                   if (userInfo.publicKey) {
@@ -35,6 +37,10 @@ export default function ConnectWallet() {
                   console.error("Connection error:", e);
                   alert(e.message || "Failed to connect to wallet!");
             }
+      };
+
+      const handleConnectClick = () => {
+            setIsWalletModalOpen(true);
       };
 
       const handleDisconnect = () => {
@@ -78,11 +84,16 @@ export default function ConnectWallet() {
       return (
             <div>
                   <Button
-                        onClick={() => handleConnect(FREIGHTER_ID)}
+                        onClick={handleConnectClick}
                         className="bg-purple-600 hover:bg-purple-700 shadow-lg flex items-center gap-2 px-6 py-3"
                   >
                         Connect Wallet
                   </Button>
+                  <WalletModal
+                        isOpen={isWalletModalOpen}
+                        onClose={() => setIsWalletModalOpen(false)}
+                        onConnect={handleConnect}
+                  />
             </div>
       );
 }
