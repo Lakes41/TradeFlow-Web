@@ -5,8 +5,10 @@ import { Toaster } from "sonner";
 import ToasterProvider from "../components/general/ToasterProvider";
 import { SlippageProvider } from "../contexts/SlippageContext";
 import { NetworkCongestionProvider } from "../contexts/NetworkCongestionContext";
+import { BackendHealthProvider } from "../contexts/BackendHealthContext";
 import Footer from "../components/layout/Footer";
 import NetworkCongestionBanner from "../components/NetworkCongestionBanner";
+import DegradedPerformanceBanner from "../components/DegradedPerformanceBanner";
 import ErrorBoundary from "../components/ErrorBoundary";
 import PageTransition from "../components/PageTransition";
 import QueryProvider from "../providers/QueryClientProvider";
@@ -47,6 +49,17 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </NetworkCongestionProvider>
           </SettingsProvider>
         </ErrorBoundary>
+        <html lang="en" className={inter.variable}>
+          <body className="font-sans">
+            <SettingsProvider>
+              <NetworkGuard>
+                {children}
+                <ToasterProvider />
+              </NetworkGuard>
+            </SettingsProvider>
+          </body>
+        </html>
+        );
       </body>
     </html>
   );
