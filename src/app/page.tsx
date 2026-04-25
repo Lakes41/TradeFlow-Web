@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { connectWallet, WalletType } from "../lib/stellar";
 import { PlusCircle, ShieldCheck, Landmark, Star } from "lucide-react";
 import LoanTable from "../components/LoanTable";
@@ -11,6 +12,7 @@ import Card from "../components/Card";
 import WalletModal from "../components/WalletModal";
 import InvoiceMintForm from "../components/InvoiceMintForm";
 import InvoiceTable from "../components/InvoiceTable";
+import InvoiceFilter, { InvoiceFilters } from "../components/InvoiceFilter";
 import NewsBanner from "../components/NewsBanner";
 import useTransactionToast from "../lib/useTransactionToast";
 import AddTrustlineButton from "../components/AddTrustlineButton";
@@ -24,6 +26,8 @@ import type { InvoiceSummary } from "../../types/api";
 import { RiskSocketClient } from "../lib/riskSocket";
 
 export default function Page() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [address, setAddress] = useState("");
   const [invoices, setInvoices] = useState<InvoiceSummary[]>([]);
   const [loading, setLoading] = useState(false);
@@ -32,6 +36,25 @@ export default function Page() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const { toggleWatchlist, isInWatchlist } = useWatchlist();
   const riskSocketRef = useRef<RiskSocketClient | null>(null);
+
+  // Initialize filters from URL params
+  const [filters, setFilters] = useState<InvoiceFilters>(() => ({
+    minApy: parseFloat(searchParams.get('minApy') || '0'),
+    maxApy: parseFloat(searchParams.get('maxApy') || '25'),
+    tiers: searchParams.get('tiers')?.split(',').filter(Boolean) || [],
+  }));
+
+  // Update URL when filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (filters.minApy > 0) params.set('minApy', filters.minApy.toString());
+    if (filters.maxApy < 25) params.set('maxApy', filters.maxApy.toString());
+    if (filters.tiers.length > 0) params.set('tiers', filters.tiers.join(','));
+    
+    const queryString = params.toString();
+    const newUrl = queryString ? `/?${queryString}` : '/';
+    router.replace(newUrl);
+  }, [filters, router]);
 
   // 1. Connect Stellar Wallet (supports Freighter, Albedo, xBull)
   const handleConnectWallet = async (walletType: WalletType) => {
@@ -162,20 +185,11 @@ export default function Page() {
           onTabChange={setActiveTab}
         />
 
-        {/* Main Content */}
-        <div className="flex-1 px-4 lg:px-8">
-          {/* Tab Navigation */}
-          <TabNavigation
-            tabs={tabs}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
-
-          {/* Tab Content */}
-          {activeTab === "watchlist" ? (
-            <WatchlistTab />
-          ) : (
-            <>
+        {/* Tab Content */}
+        {activeTab === "watchlist" ? (
+          <WatchlistTab />
+        ) : (
+          <>
               {/* Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                 <Card>
@@ -237,116 +251,20 @@ export default function Page() {
                 </div>
               </div>
 
-            {/* Invoice Table */}
-            <InvoiceTable />
-            <div className="bg-tradeflow-secondary rounded-2xl border border-tradeflow-muted overflow-hidden mb-12">
-              <div className="p-6 border-b border-slate-700">
-                <h2 className="text-xl font-semibold">Verified Asset Pipeline</h2>
-              </div>
-              <table className="w-full text-left">
-                <thead className="bg-tradeflow-dark/50 text-tradeflow-muted text-sm uppercase">
-                  <tr>
-                    <th className="p-4">Invoice ID</th>
-                    <th className="p-4">Risk Score</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {loading ? (
-                    // Show 5 skeleton rows while loading
-                    Array.from({ length: 5 }).map((_, index) => (
-                      <SkeletonRow key={`skeleton-${index}`} />
-                    ))
-                  ) : (
-                    invoices.map((inv) => (
-                      <tr
-                        key={inv.id}
-                        className="border-b border-tradeflow-muted/50 hover:bg-tradeflow-muted/20 transition"
-                      >
-                        <td className="p-4 font-mono text-sm text-blue-300">
-                          #{inv.id.slice(-6)}
-                        </td>
-                        <td className="p-4">
-                          <div className="w-full bg-tradeflow-muted h-2 rounded-full max-w-[100px]">
-                            <div
-                              className="bg-blue-500 h-2 rounded-full"
-                              style={{ width: `${inv.riskScore}%` }}
-                            ></div>
-                          </div>
-                        </td>
-                        <td className="p-4 text-sm font-medium">
-                          <span
-                            className={`px-3 py-1 rounded-full ${inv.status === "Approved" ? "bg-tradeflow-success/20 text-tradeflow-success" : "bg-tradeflow-warning/20 text-tradeflow-warning"}`}
-                          >
-                            {inv.status}
-                          </span>
-                        </td>
-                        <td className="p-4 font-bold text-lg">${inv.amount}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Active Loans Table (Issue #6) */}
-            <div className="bg-tradeflow-secondary rounded-2xl border border-tradeflow-muted overflow-hidden">
-              <div className="p-6 border-b border-slate-700">
-                <h2 className="text-xl font-semibold">Active Loans Dashboard</h2>
-              </div>
-              <div className="p-6 bg-tradeflow-dark/50">
-                <LoanTable />
-              {/* Invoice Table */}
-              <div className="bg-tradeflow-secondary rounded-2xl border border-tradeflow-muted overflow-hidden mb-12">
-                <div className="p-6 border-b border-slate-700">
-                  <h2 className="text-xl font-semibold">Verified Asset Pipeline</h2>
+              {/* Invoice Table with Filters */}
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-12">
+                {/* Filter Sidebar */}
+                <div className="lg:col-span-1">
+                  <InvoiceFilter
+                    filters={filters}
+                    onFiltersChange={setFilters}
+                  />
                 </div>
-                <table className="w-full text-left">
-                  <thead className="bg-tradeflow-dark/50 text-tradeflow-muted text-sm uppercase">
-                    <tr>
-                      <th className="p-4">Invoice ID</th>
-                      <th className="p-4">Risk Score</th>
-                      <th className="p-4">Status</th>
-                      <th className="p-4">Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {loading ? (
-                      // Show 5 skeleton rows while loading
-                      Array.from({ length: 5 }).map((_, index) => (
-                        <SkeletonRow key={`skeleton-${index}`} />
-                      ))
-                    ) : (
-                      invoices.map((inv: { id: string; riskScore: number; status: string; amount: number | string }) => (
-                        <tr
-                          key={inv.id}
-                          className="border-b border-tradeflow-muted/50 hover:bg-tradeflow-muted/20 transition"
-                        >
-                          <td className="p-4 font-mono text-sm text-blue-300">
-                            #{inv.id.slice(-6)}
-                          </td>
-                          <td className="p-4">
-                            <div className="w-full bg-tradeflow-muted h-2 rounded-full max-w-[100px]">
-                              <div
-                                className="bg-blue-500 h-2 rounded-full"
-                                style={{ width: `${inv.riskScore}%` }}
-                              ></div>
-                            </div>
-                          </td>
-                          <td className="p-4 text-sm font-medium">
-                            <span
-                              className={`px-3 py-1 rounded-full ${inv.status === "Approved" ? "bg-tradeflow-success/20 text-tradeflow-success" : "bg-tradeflow-warning/20 text-tradeflow-warning"}`}
-                            >
-                              {inv.status}
-                            </span>
-                          </td>
-                          <td className="p-4 font-bold text-lg">${inv.amount}</td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
+
+                {/* Invoice Table */}
+                <div className="lg:col-span-3">
+                  <InvoiceTable filters={filters} />
+                </div>
               </div>
 
               {/* Active Loans Table (Issue #6) */}

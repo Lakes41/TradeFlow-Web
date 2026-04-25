@@ -10,6 +10,8 @@ interface Invoice {
   riskScore: number;
   status: string;
   amount: number;
+  apy?: number;
+  riskTier?: 'A' | 'B' | 'C' | 'D';
 }
 
 interface PaginationInfo {
@@ -26,9 +28,26 @@ interface InvoicesResponse {
   pagination: PaginationInfo;
 }
 
-const InvoiceTable: React.FC = () => {
+interface InvoiceTableProps {
+  filters?: {
+    minApy: number;
+    maxApy: number;
+    tiers: string[];
+  };
+}
+
+const InvoiceTable: React.FC<InvoiceTableProps> = ({ filters }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
+
+  // Build query string from filters
+  const queryString = new URLSearchParams({
+    page: currentPage.toString(),
+    limit: itemsPerPage.toString(),
+    ...(filters?.minApy !== undefined && { minApy: filters.minApy.toString() }),
+    ...(filters?.maxApy !== undefined && { maxApy: filters.maxApy.toString() }),
+    ...(filters?.tiers && filters.tiers.length > 0 && { tiers: filters.tiers.join(',') }),
+  }).toString();
 
   const {
     data: invoicesData,
@@ -36,11 +55,9 @@ const InvoiceTable: React.FC = () => {
     isFetching,
     error,
   } = useQuery<InvoicesResponse>({
-    queryKey: ['invoices', currentPage, itemsPerPage],
+    queryKey: ['invoices', currentPage, itemsPerPage, filters],
     queryFn: async () => {
-      const response = await fetch(
-        `/api/invoices?page=${currentPage}&limit=${itemsPerPage}`
-      );
+      const response = await fetch(`/api/invoices?${queryString}`);
       if (!response.ok) {
         throw new Error('Failed to fetch invoices');
       }
@@ -75,6 +92,8 @@ const InvoiceTable: React.FC = () => {
             <tr>
               <th className="p-4">Invoice ID</th>
               <th className="p-4">Risk Score</th>
+              <th className="p-4">Risk Tier</th>
+              <th className="p-4">APY</th>
               <th className="p-4">Status</th>
               <th className="p-4">Amount</th>
             </tr>
@@ -102,6 +121,23 @@ const InvoiceTable: React.FC = () => {
                         style={{ width: `${invoice.riskScore}%` }}
                       ></div>
                     </div>
+                  </td>
+                  <td className="p-4">
+                    {invoice.riskTier && (
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-bold ${
+                          invoice.riskTier === 'A' ? 'bg-green-500/20 text-green-400' :
+                          invoice.riskTier === 'B' ? 'bg-blue-500/20 text-blue-400' :
+                          invoice.riskTier === 'C' ? 'bg-yellow-500/20 text-yellow-400' :
+                          'bg-red-500/20 text-red-400'
+                        }`}
+                      >
+                        {invoice.riskTier}
+                      </span>
+                    )}
+                  </td>
+                  <td className="p-4 font-medium text-green-400">
+                    {invoice.apy ? `${invoice.apy.toFixed(2)}%` : 'N/A'}
                   </td>
                   <td className="p-4 text-sm font-medium">
                     <span
