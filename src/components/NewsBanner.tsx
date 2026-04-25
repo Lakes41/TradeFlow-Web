@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
+import Icon from './ui/Icon';
 
 export default function NewsBanner() {
   const [isVisible, setIsVisible] = useState(true);
@@ -24,7 +25,7 @@ export default function NewsBanner() {
         className="absolute right-4 top-1/2 transform -translate-y-1/2 text-white/80 hover:text-white transition-colors"
         aria-label="Close banner"
       >
-        <X size={16} />
+        <Icon icon={X} dense />
       </button>
     </div>
   );

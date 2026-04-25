@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Settings as SettingsIcon, Shield, Bell, User, Globe, HelpCircle } from 'lucide-react';
+import Icon from '../components/ui/Icon';
 
 export default function SettingsPage() {
   return (
@@ -16,7 +17,7 @@ export default function SettingsPage() {
           {/* Account Settings */}
           <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-6">
             <div className="flex items-center gap-3 mb-4">
-              <User className="text-blue-400" size={24} />
+              <Icon icon={User} className="text-blue-400" />
               <h2 className="text-xl font-semibold">Account Settings</h2>
             </div>
             <div className="space-y-4">
@@ -44,7 +45,7 @@ export default function SettingsPage() {
           {/* Privacy Settings */}
           <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-6">
             <div className="flex items-center gap-3 mb-4">
-              <Shield className="text-green-400" size={24} />
+              <Icon icon={Shield} className="text-green-400" />
               <h2 className="text-xl font-semibold">Privacy & Security</h2>
             </div>
             <div className="space-y-4">
@@ -73,7 +74,7 @@ export default function SettingsPage() {
           {/* Notification Settings */}
           <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-6">
             <div className="flex items-center gap-3 mb-4">
-              <Bell className="text-yellow-400" size={24} />
+              <Icon icon={Bell} className="text-yellow-400" />
               <h2 className="text-xl font-semibold">Notifications</h2>
             </div>
             <div className="space-y-4">
@@ -101,7 +102,7 @@ export default function SettingsPage() {
           {/* Application Settings */}
           <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-6">
             <div className="flex items-center gap-3 mb-4">
-              <Globe className="text-purple-400" size={24} />
+              <Icon icon={Globe} className="text-purple-400" />
               <h2 className="text-xl font-semibold">Application</h2>
             </div>
             <div className="space-y-4">
@@ -136,7 +137,7 @@ export default function SettingsPage() {
         {/* Help Section */}
         <div className="mt-8 bg-slate-800/50 rounded-xl border border-slate-700/50 p-6">
           <div className="flex items-center gap-3 mb-4">
-            <HelpCircle className="text-cyan-400" size={24} />
+            <Icon icon={HelpCircle} className="text-cyan-400" />
             <h2 className="text-xl font-semibold">Help & Support</h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

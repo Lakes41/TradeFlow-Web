@@ -3,6 +3,7 @@
 import React from "react";
 import { X, ExternalLink, CreditCard, ShieldCheck, Zap } from "lucide-react";
 import Card from "./Card";
+import Icon from "./ui/Icon";
 
 interface FiatOnRampModalProps {
   isOpen: boolean;
@@ -43,7 +44,7 @@ export default function FiatOnRampModal({ isOpen, onClose }: FiatOnRampModalProp
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors p-2 hover:bg-slate-900 rounded-full"
           >
-            <X size={20} />
+            <Icon icon={X} />
           </button>
         </div>
 
@@ -56,16 +57,16 @@ export default function FiatOnRampModal({ isOpen, onClose }: FiatOnRampModalProp
               <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center group-hover:scale-110 transition-transform`}>
-                    <CreditCard className="text-blue-400" size={20} />
+                    <Icon icon={CreditCard} className="text-blue-400" />
                   </div>
                   <div>
                     <h3 className="font-bold text-white text-lg">{p.name}</h3>
                     <div className="flex items-center gap-4 mt-1">
                        <span className="text-xs text-slate-500 flex items-center gap-1">
-                         <ShieldCheck size={12} className="text-green-500" /> Secure
+                         <Icon icon={ShieldCheck} dense className="text-green-500" /> Secure
                        </span>
                        <span className="text-xs text-slate-500 flex items-center gap-1">
-                         <Zap size={12} className="text-orange-500" /> {p.speed}
+                         <Icon icon={Zap} dense className="text-orange-500" /> {p.speed}
                        </span>
                     </div>
                   </div>
@@ -80,7 +81,7 @@ export default function FiatOnRampModal({ isOpen, onClose }: FiatOnRampModalProp
               <div className="flex items-center justify-between text-xs">
                 <span className="text-slate-500">Processing Fee: <span className="text-slate-300">{p.fee}</span></span>
                 <span className="text-blue-400 font-medium flex items-center gap-1">
-                  Continue to {p.name} <ExternalLink size={14} />
+                  Continue to {p.name} <Icon icon={ExternalLink} dense />
                 </span>
               </div>
             </button>

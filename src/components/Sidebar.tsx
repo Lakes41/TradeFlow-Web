@@ -18,6 +18,7 @@ import {
   CreditCard
 } from "lucide-react";
 import toast from "react-hot-toast";
+import Icon from "./ui/Icon";
 
 // Import existing components
 import NetworkSelector from "./NetworkSelector";
@@ -47,17 +48,17 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
     {
       name: "Marketplace",
       href: "/",
-      icon: <LayoutDashboard size={20} />,
+      icon: <Icon icon={LayoutDashboard} />,
     },
     {
       name: "Portfolio",
       href: "/portfolio",
-      icon: <Briefcase size={20} />,
+      icon: <Icon icon={Briefcase} />,
     },
     {
       name: "Settings",
       href: "/settings",
-      icon: <Settings size={20} />,
+      icon: <Icon icon={Settings} />,
     },
   ];
 
@@ -163,7 +164,7 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
             onClick={() => setIsMobileMenuOpen(true)}
             className="p-2 rounded-lg hover:bg-slate-700/50 transition-colors"
           >
-            <Menu size={24} />
+            <Icon icon={Menu} />
           </button>
         </div>
       </div>
@@ -193,7 +194,7 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
               onClick={() => setIsMobileMenuOpen(false)}
               className="p-2 rounded-lg hover:bg-slate-700/50 transition-colors"
             >
-              <X size={24} />
+              <Icon icon={X} />
             </button>
           </div>
 
@@ -215,13 +216,13 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
               onClick={() => setIsFiatModalOpen(true)}
               className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition"
             >
-              <CreditCard size={18} />
+              <Icon icon={CreditCard} />
               Buy Crypto
             </button>
 
             {address ? (
               <div className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition">
-                <Wallet size={18} />
+                <Icon icon={Wallet} />
                 <span className="text-sm truncate">
                   {`${address.slice(0, 6)}...${address.slice(-4)}`}
                 </span>
@@ -231,9 +232,9 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
                   title="Copy address"
                 >
                   {copied ? (
-                    <Check size={16} className="text-green-300" />
+                    <Icon icon={Check} dense className="text-green-300" />
                   ) : (
-                    <Copy size={16} className="text-white" />
+                    <Icon icon={Copy} dense className="text-white" />
                   )}
                 </button>
               </div>
@@ -245,7 +246,7 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
                 }}
                 className="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition animate-pulse"
               >
-                <Wallet size={18} />
+                <Icon icon={Wallet} />
                 Connect Wallet
               </button>
             )}
@@ -271,7 +272,7 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
                 className="p-2 rounded-lg hover:bg-slate-700/50 transition-colors"
                 title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               >
-                {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+                {isCollapsed ? <Icon icon={ChevronRight} /> : <Icon icon={ChevronLeft} />}
               </button>
             </div>
 
@@ -295,7 +296,7 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
                     onClick={() => setIsFiatModalOpen(true)}
                     className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition"
                   >
-                    <CreditCard size={18} />
+                    <Icon icon={CreditCard} />
                     Buy Crypto
                   </button>
                 </>
@@ -305,7 +306,7 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
                 <div className={`flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg transition ${
                   isCollapsed ? "justify-center" : ""
                 }`}>
-                  <Wallet size={18} />
+                  <Icon icon={Wallet} />
                   {!isCollapsed && (
                     <>
                       <span className="text-sm truncate">
@@ -317,9 +318,9 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
                         title="Copy address"
                       >
                         {copied ? (
-                          <Check size={16} className="text-green-300" />
+                          <Icon icon={Check} dense className="text-green-300" />
                         ) : (
-                          <Copy size={16} className="text-white" />
+                          <Icon icon={Copy} dense className="text-white" />
                         )}
                       </button>
                     </>
@@ -332,7 +333,7 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
                     isCollapsed ? "justify-center" : ""
                   }`}
                 >
-                  <Wallet size={18} />
+                  <Icon icon={Wallet} />
                   {!isCollapsed && <span>Connect Wallet</span>}
                 </button>
               )}

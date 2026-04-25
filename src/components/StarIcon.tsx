@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Star } from 'lucide-react';
+import Icon from './ui/Icon';
 
 interface StarIconProps {
   isStarred: boolean;
@@ -17,7 +18,8 @@ export default function StarIcon({ isStarred, onClick, size = 16, className = ''
       className={`p-1 rounded-full transition-all duration-200 hover:bg-tradeflow-muted/30 ${className}`}
       aria-label={isStarred ? 'Remove from watchlist' : 'Add to watchlist'}
     >
-      <Star
+      <Icon
+        icon={Star}
         size={size}
         className={`transition-colors duration-200 ${
           isStarred

@@ -6,6 +6,7 @@ import Card from "./Card";
 import Button from "./ui/Button";
 import { signTransaction } from "../lib/stellar";
 import { useSigningActions, useIsSigning } from "../stores/signatureStore";
+import Icon from "./ui/Icon";
 
 interface TransactionSignatureModalProps {
   isOpen: boolean;
@@ -104,7 +105,7 @@ export default function TransactionSignatureModal({
             onClick={onClose}
             className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
           >
-            <X size={20} />
+            <Icon icon={X} />
           </button>
         )}
 

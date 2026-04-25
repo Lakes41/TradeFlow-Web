@@ -10,6 +10,7 @@ import DynamicRiskAssessmentChart from "../../../components/DynamicRiskAssessmen
 import { useTokenStore } from "../../../stores/tokenStore";
 import { ArrowLeft, ExternalLink, Shield, TrendingUp } from "lucide-react";
 import Link from "next/link";
+import Icon from "../../../components/ui/Icon";
 
 // Stellar testnet USDC issuer
 const USDC_CODE = "USDC";
@@ -91,14 +92,14 @@ export default function InvoiceDetailPage() {
               href="/marketplace"
               className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors"
             >
-              <ArrowLeft size={16} />
+              <Icon icon={ArrowLeft} dense />
               Back
             </Link>
             <button
               onClick={() => setShowBuyModal(true)}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
             >
-              <ExternalLink size={16} />
+              <Icon icon={ExternalLink} dense />
               Trade
             </button>
           </div>
@@ -165,7 +166,7 @@ export default function InvoiceDetailPage() {
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold">Performance</h2>
                 <div className="flex items-center gap-2 text-green-400">
-                  <TrendingUp size={20} />
+                  <Icon icon={TrendingUp} />
                   <span className="font-medium">+12.5%</span>
                 </div>
               </div>

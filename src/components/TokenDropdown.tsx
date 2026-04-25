@@ -7,6 +7,7 @@ import { useRecentTokens } from "../hooks/useRecentTokens";
 import { useWatchlist } from "../hooks/useWatchlist";
 import StarIcon from "./StarIcon";
 import toast from "react-hot-toast";
+import Icon from "./ui/Icon";
 
 interface TokenDropdownProps {
   onTokenChange?: (token: string) => void;
@@ -98,10 +99,7 @@ export default function TokenDropdown({ onTokenChange }: TokenDropdownProps) {
         className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 transition-colors min-w-[120px] justify-between"
       >
         <span className="font-medium text-white">{selectedToken}</span>
-        <ChevronDown
-          size={16}
-          className={`text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
-        />
+        <Icon icon={ChevronDown} dense className={`text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
       {/* Dropdown Menu */}
@@ -110,10 +108,7 @@ export default function TokenDropdown({ onTokenChange }: TokenDropdownProps) {
           {/* Search Input */}
           <div className="border-b border-slate-700 p-3 sticky top-0 bg-slate-800">
             <div className="relative">
-              <Search
-                size={16}
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 pointer-events-none"
-              />
+              <Icon icon={Search} dense className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 pointer-events-none" />
               <input
                 ref={searchInputRef}
                 type="text"
@@ -128,7 +123,7 @@ export default function TokenDropdown({ onTokenChange }: TokenDropdownProps) {
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
                   aria-label="Clear search"
                 >
-                  <X size={16} />
+                  <Icon icon={X} dense />
                 </button>
               )}
             </div>
@@ -157,12 +152,11 @@ export default function TokenDropdown({ onTokenChange }: TokenDropdownProps) {
                           className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-blue-400 transition-all p-1"
                           title="Copy Contract Address"
                         >
-                          <Copy size={14} />
+                        <Icon icon={Copy} dense />
                         </div>
                         <StarIcon
                           isStarred={isInWatchlist(token)}
                           onClick={() => toggleWatchlist(token)}
-                          size={14}
                         />
                       </div>
                       {token === selectedToken && (
@@ -193,12 +187,11 @@ export default function TokenDropdown({ onTokenChange }: TokenDropdownProps) {
                       className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-blue-400 transition-all p-1"
                       title="Copy Contract Address"
                     >
-                      <Copy size={14} />
+                      <Icon icon={Copy} dense />
                     </div>
                     <StarIcon
                       isStarred={isInWatchlist(token)}
                       onClick={() => toggleWatchlist(token)}
-                      size={14}
                     />
                   </div>
                   {token === selectedToken && (
@@ -214,7 +207,7 @@ export default function TokenDropdown({ onTokenChange }: TokenDropdownProps) {
              */
             <div className="px-6 py-10 text-center flex flex-col items-center justify-center">
               <div className="bg-slate-700/50 p-3 rounded-full mb-4">
-                <Search size={24} className="text-slate-500" />
+                <Icon icon={Search} className="text-slate-500" />
               </div>
               <p className="text-white font-medium mb-1">No tokens found</p>
               <p className="text-xs text-slate-400 leading-relaxed max-w-[180px]">

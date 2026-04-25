@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { connectWallet, WalletType } from "../lib/stellar";
-import { PlusCircle, ShieldCheck, Landmark, Star } from "lucide-react";
+import { PlusCircle, ShieldCheck, Landmark, Star, Wallet } from "lucide-react";
 import LoanTable from "../components/LoanTable";
 import SkeletonRow from "../components/SkeletonRow";
 import Navbar from "../components/Navbar";
@@ -24,6 +24,7 @@ import StarIcon from "../components/StarIcon";
 import { api } from "../lib/api";
 import type { InvoiceSummary } from "../../types/api";
 import { RiskSocketClient } from "../lib/riskSocket";
+import Icon from "../components/ui/Icon";
 
 export default function Page() {
   const router = useRouter();
@@ -146,7 +147,7 @@ export default function Page() {
 
   const tabs = [
     { id: "dashboard", label: "Dashboard" },
-    { id: "watchlist", label: "Watchlist", icon: <Star size={16} /> },
+    { id: "watchlist", label: "Watchlist", icon: <Icon icon={Star} dense /> },
   ];
 
   return (
@@ -168,7 +169,7 @@ export default function Page() {
             onClick={() => setIsModalOpen(true)}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full transition shadow-lg shadow-blue-900/20"
           >
-            <Wallet size={18} />
+            <Icon icon={Wallet} dense />
             {address
               ? `${address.slice(0, 6)}...${address.slice(-4)}`
               : "Connect Wallet"}
@@ -206,7 +207,7 @@ export default function Page() {
                   onClick={() => setShowMintForm(true)}
                   className="bg-tradeflow-accent/10 border-2 border-dashed border-tradeflow-accent/50 p-6 rounded-2xl flex flex-col items-center justify-center hover:bg-tradeflow-accent/20 transition"
                 >
-                  <PlusCircle className="text-tradeflow-accent mb-2" size={32} />
+                  <Icon icon={PlusCircle} className="text-tradeflow-accent mb-2" size={32} />
                   <span className="font-medium text-tradeflow-accent">
                     Mint New Invoice NFT
                   </span>
@@ -226,7 +227,6 @@ export default function Page() {
                       <StarIcon
                         isStarred={isInWatchlist("USDC")}
                         onClick={() => toggleWatchlist("USDC")}
-                        size={14}
                       />
                     </div>
                     <AddTrustlineButton
@@ -240,7 +240,6 @@ export default function Page() {
                       <StarIcon
                         isStarred={isInWatchlist("yXLM")}
                         onClick={() => toggleWatchlist("yXLM")}
-                        size={14}
                       />
                     </div>
                     <AddTrustlineButton
