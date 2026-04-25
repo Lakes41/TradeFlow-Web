@@ -1,13 +1,13 @@
 "use client";
 
-import toast from "react-hot-toast";
+import { showError, showLoading, showSuccess } from "./toast";
 
 export default function useTransactionToast() {
   const loading = (message = "Waiting for confirmation...") =>
-    toast.loading(message);
+    showLoading(message);
   const success = (message = "Invoice Minted Successfully!") =>
-    toast.success(message);
-  const error = (message = "Transaction Failed") => toast.error(message);
+    showSuccess(message);
+  const error = (message = "Transaction Failed") => showError(message);
 
   return { loading, success, error };
 }

@@ -1,8 +1,7 @@
 import "./globals.css";
 import React from "react";
 import { Inter } from "next/font/google";
-import { Toaster } from "sonner";
-import ToasterProvider from "../components/general/ToasterProvider";
+import { Toaster } from "../components/ui/Toaster";
 import { SlippageProvider } from "../contexts/SlippageContext";
 import { NetworkCongestionProvider } from "../contexts/NetworkCongestionContext";
 import Footer from "../components/layout/Footer";
@@ -25,34 +24,24 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} font-sans antialiased`}>
-        <ErrorBoundary>
-          <NetworkCongestionProvider>
-            <SlippageProvider>
-              <ToasterProvider />
-              {/* <Toaster position="top-right" richColors closeButton /> */}
-              <NetworkCongestionBanner />
-              <QueryProvider>
-                <PageTransition>
-                  {children}
-                </PageTransition>
-              </QueryProvider>
-              <PageTransition>
-                {children}
-              </PageTransition>
-              <Footer />
-            </SlippageProvider>
-          </NetworkCongestionProvider>
-        </ErrorBoundary>
     <html lang="en" className={inter.variable}>
-      <body className="font-sans">
-        <SettingsProvider>
-          <NetworkGuard>
-            {children}
-            <ToasterProvider />
-          </NetworkGuard>
-        </SettingsProvider>
+      <body className="font-sans antialiased">
+        <ErrorBoundary>
+          <SettingsProvider>
+            <NetworkGuard>
+              <NetworkCongestionProvider>
+                <SlippageProvider>
+                  <Toaster />
+                  <NetworkCongestionBanner />
+                  <QueryProvider>
+                    <PageTransition>{children}</PageTransition>
+                  </QueryProvider>
+                  <Footer />
+                </SlippageProvider>
+              </NetworkCongestionProvider>
+            </NetworkGuard>
+          </SettingsProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );

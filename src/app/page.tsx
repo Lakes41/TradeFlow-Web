@@ -22,6 +22,7 @@ import StarIcon from "../components/StarIcon";
 import { api } from "../lib/api";
 import type { InvoiceSummary } from "../../types/api";
 import { RiskSocketClient } from "../lib/riskSocket";
+import { showError, showSuccess } from "../lib/toast";
 
 export default function Page() {
   const [address, setAddress] = useState("");
@@ -40,11 +41,12 @@ export default function Page() {
       if (userInfo && userInfo.publicKey) {
         setAddress(userInfo.publicKey);
         console.log("Wallet connected:", userInfo.publicKey, "Type:", userInfo.walletType);
+        showSuccess("Wallet connected");
       }
     } catch (e: unknown) {
       const error = e as Error;
       console.error("Connection failed:", error.message);
-      alert(error.message || "Failed to connect to wallet.");
+      showError(error.message || "Failed to connect to wallet.");
     }
   };
 
@@ -237,67 +239,8 @@ export default function Page() {
                 </div>
               </div>
 
-            {/* Invoice Table */}
-            <InvoiceTable />
-            <div className="bg-tradeflow-secondary rounded-2xl border border-tradeflow-muted overflow-hidden mb-12">
-              <div className="p-6 border-b border-slate-700">
-                <h2 className="text-xl font-semibold">Verified Asset Pipeline</h2>
-              </div>
-              <table className="w-full text-left">
-                <thead className="bg-tradeflow-dark/50 text-tradeflow-muted text-sm uppercase">
-                  <tr>
-                    <th className="p-4">Invoice ID</th>
-                    <th className="p-4">Risk Score</th>
-                    <th className="p-4">Status</th>
-                    <th className="p-4">Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {loading ? (
-                    // Show 5 skeleton rows while loading
-                    Array.from({ length: 5 }).map((_, index) => (
-                      <SkeletonRow key={`skeleton-${index}`} />
-                    ))
-                  ) : (
-                    invoices.map((inv) => (
-                      <tr
-                        key={inv.id}
-                        className="border-b border-tradeflow-muted/50 hover:bg-tradeflow-muted/20 transition"
-                      >
-                        <td className="p-4 font-mono text-sm text-blue-300">
-                          #{inv.id.slice(-6)}
-                        </td>
-                        <td className="p-4">
-                          <div className="w-full bg-tradeflow-muted h-2 rounded-full max-w-[100px]">
-                            <div
-                              className="bg-blue-500 h-2 rounded-full"
-                              style={{ width: `${inv.riskScore}%` }}
-                            ></div>
-                          </div>
-                        </td>
-                        <td className="p-4 text-sm font-medium">
-                          <span
-                            className={`px-3 py-1 rounded-full ${inv.status === "Approved" ? "bg-tradeflow-success/20 text-tradeflow-success" : "bg-tradeflow-warning/20 text-tradeflow-warning"}`}
-                          >
-                            {inv.status}
-                          </span>
-                        </td>
-                        <td className="p-4 font-bold text-lg">${inv.amount}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Active Loans Table (Issue #6) */}
-            <div className="bg-tradeflow-secondary rounded-2xl border border-tradeflow-muted overflow-hidden">
-              <div className="p-6 border-b border-slate-700">
-                <h2 className="text-xl font-semibold">Active Loans Dashboard</h2>
-              </div>
-              <div className="p-6 bg-tradeflow-dark/50">
-                <LoanTable />
               {/* Invoice Table */}
+              <InvoiceTable />
               <div className="bg-tradeflow-secondary rounded-2xl border border-tradeflow-muted overflow-hidden mb-12">
                 <div className="p-6 border-b border-slate-700">
                   <h2 className="text-xl font-semibold">Verified Asset Pipeline</h2>
@@ -318,7 +261,7 @@ export default function Page() {
                         <SkeletonRow key={`skeleton-${index}`} />
                       ))
                     ) : (
-                      invoices.map((inv: { id: string; riskScore: number; status: string; amount: number | string }) => (
+                      invoices.map((inv) => (
                         <tr
                           key={inv.id}
                           className="border-b border-tradeflow-muted/50 hover:bg-tradeflow-muted/20 transition"
@@ -356,29 +299,88 @@ export default function Page() {
                 </div>
                 <div className="p-6 bg-tradeflow-dark/50">
                   <LoanTable />
-                </div>
+                  {/* Invoice Table */}
+                  <div className="bg-tradeflow-secondary rounded-2xl border border-tradeflow-muted overflow-hidden mb-12">
+                    <div className="p-6 border-b border-slate-700">
+                      <h2 className="text-xl font-semibold">Verified Asset Pipeline</h2>
+                    </div>
+                    <table className="w-full text-left">
+                      <thead className="bg-tradeflow-dark/50 text-tradeflow-muted text-sm uppercase">
+                        <tr>
+                          <th className="p-4">Invoice ID</th>
+                          <th className="p-4">Risk Score</th>
+                          <th className="p-4">Status</th>
+                          <th className="p-4">Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {loading ? (
+                          // Show 5 skeleton rows while loading
+                          Array.from({ length: 5 }).map((_, index) => (
+                            <SkeletonRow key={`skeleton-${index}`} />
+                          ))
+                        ) : (
+                          invoices.map((inv: { id: string; riskScore: number; status: string; amount: number | string }) => (
+                            <tr
+                              key={inv.id}
+                              className="border-b border-tradeflow-muted/50 hover:bg-tradeflow-muted/20 transition"
+                            >
+                              <td className="p-4 font-mono text-sm text-blue-300">
+                                #{inv.id.slice(-6)}
+                              </td>
+                              <td className="p-4">
+                                <div className="w-full bg-tradeflow-muted h-2 rounded-full max-w-[100px]">
+                                  <div
+                                    className="bg-blue-500 h-2 rounded-full"
+                                    style={{ width: `${inv.riskScore}%` }}
+                                  ></div>
+                                </div>
+                              </td>
+                              <td className="p-4 text-sm font-medium">
+                                <span
+                                  className={`px-3 py-1 rounded-full ${inv.status === "Approved" ? "bg-tradeflow-success/20 text-tradeflow-success" : "bg-tradeflow-warning/20 text-tradeflow-warning"}`}
+                                >
+                                  {inv.status}
+                                </span>
+                              </td>
+                              <td className="p-4 font-bold text-lg">${inv.amount}</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Active Loans Table (Issue #6) */}
+                  <div className="bg-tradeflow-secondary rounded-2xl border border-tradeflow-muted overflow-hidden">
+                    <div className="p-6 border-b border-slate-700">
+                      <h2 className="text-xl font-semibold">Active Loans Dashboard</h2>
+                    </div>
+                    <div className="p-6 bg-tradeflow-dark/50">
+                      <LoanTable />
+                    </div>
+                  </div>
+
+                  {/* Pro Mode Charts (Lazy-loaded) */}
+                  <ProModeSection />
+                </>
+          )}
               </div>
 
-              {/* Pro Mode Charts (Lazy-loaded) */}
-              <ProModeSection />
-            </>
-          )}
+              <WalletModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onConnect={handleConnectWallet}
+              />
+
+              {/* Invoice Mint Form Modal */}
+              {showMintForm && (
+                <InvoiceMintForm
+                  onClose={() => setShowMintForm(false)}
+                  onSubmit={handleInvoiceMint}
+                />
+              )}
+            </div>
         </div>
-
-        <WalletModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          onConnect={handleConnectWallet}
-        />
-
-        {/* Invoice Mint Form Modal */}
-        {showMintForm && (
-          <InvoiceMintForm
-            onClose={() => setShowMintForm(false)}
-            onSubmit={handleInvoiceMint}
-          />
-        )}
-      </div>
-    </div>
-  );
+        );
 }
