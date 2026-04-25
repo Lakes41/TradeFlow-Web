@@ -197,10 +197,32 @@ export const useWeb3Store = create<Web3Store>((set, get) => ({
         newBalances['XLM'] = parseFloat(xlmBalance.balance);
       }
 
-      // Process other token balances
+      // Define TradeFlow ecosystem tokens
+      const ecosystemTokens = {
+        'TF': 'GBBHPLX4LBHS5JPC4FBDHD4YDZSZJZG7VQMIY6RDZT6HRJ5QJ5N6KFGH', // TradeFlow Token
+        'USDC': 'GBBD47F6ZKZLMN3QHAIBUKFRXKMOQAPQGZ6TL2JXH5MYJ4RPYBEQXBW6', // USDC on Stellar
+        'EURC': 'GAK5GA2PQG4XQR4ERHQLQKX2SBRMJ2S5BJEXQYUOA6R5B7P7M7L4M4Q', // EURC on Stellar
+      };
+
+      // Process token balances with ecosystem token prioritization
       account.balances.forEach((balance: any) => {
         if (balance.asset_type !== 'native' && balance.asset_code) {
-          newBalances[balance.asset_code] = parseFloat(balance.balance);
+          const tokenCode = balance.asset_code.toUpperCase();
+          const balanceValue = parseFloat(balance.balance);
+          
+          // Only include tokens with positive balance
+          if (balanceValue > 0) {
+            // Check if it's an ecosystem token and verify issuer
+            if (ecosystemTokens[tokenCode as keyof typeof ecosystemTokens]) {
+              const expectedIssuer = ecosystemTokens[tokenCode as keyof typeof ecosystemTokens];
+              if (balance.asset_issuer === expectedIssuer) {
+                newBalances[tokenCode] = balanceValue;
+              }
+            } else {
+              // Include other tokens as well
+              newBalances[tokenCode] = balanceValue;
+            }
+          }
         }
       });
 
