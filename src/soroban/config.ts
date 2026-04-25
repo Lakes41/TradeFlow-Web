@@ -1,3 +1,5 @@
+import { getEffectiveNetwork, getNetworkConfig } from "../lib/networkConfig";
+
 export interface SorobanConfig {
   rpcUrl: string;
   networkPassphrase: string;
@@ -7,17 +9,21 @@ export interface SorobanConfig {
 }
 
 export function getSorobanConfig(): SorobanConfig {
-  const rpcUrl = process.env.NEXT_PUBLIC_SOROBAN_RPC_URL?.trim();
-  const networkPassphrase = process.env.NEXT_PUBLIC_STELLAR_NETWORK_PASSPHRASE?.trim();
-  const invoiceContractId = process.env.NEXT_PUBLIC_INVOICE_CONTRACT_ID?.trim();
+  // Get the effective network (with override if set in development)
+  const network = getEffectiveNetwork('Testnet');
+  const config = getNetworkConfig(network);
+  
+  // Fallback to environment variables if contract ID is not configured
+  const invoiceContractId = config.contractIds.invoice || 
+    process.env.NEXT_PUBLIC_INVOICE_CONTRACT_ID?.trim();
 
-  if (!rpcUrl) throw new Error("NEXT_PUBLIC_SOROBAN_RPC_URL is not set.");
-  if (!networkPassphrase) throw new Error("NEXT_PUBLIC_STELLAR_NETWORK_PASSPHRASE is not set.");
-  if (!invoiceContractId) throw new Error("NEXT_PUBLIC_INVOICE_CONTRACT_ID is not set.");
+  if (!invoiceContractId) {
+    throw new Error("Invoice contract ID is not configured for network: " + network);
+  }
 
   return {
-    rpcUrl,
-    networkPassphrase,
+    rpcUrl: config.rpcUrl,
+    networkPassphrase: config.networkPassphrase,
     contractIds: {
       invoice: invoiceContractId,
     },

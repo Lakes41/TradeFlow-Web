@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ServerCrash, RotateCw, Home } from 'lucide-react';
 import * as Sentry from '@sentry/nextjs';
 
-export default function ErrorPage({ error }: { error: Error; reset: () => void }) {
+export default function ErrorPage({ error, reset }: { error: Error; reset: () => void }) {
   React.useEffect(() => {
     // Send error to Sentry when this error page is rendered
     Sentry.captureException(error);
@@ -39,7 +39,7 @@ export default function ErrorPage({ error }: { error: Error; reset: () => void }
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <button
-            onClick={() => window.location.reload()}
+            onClick={reset}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-full transition-colors text-white font-medium"
           >
             <RotateCw size={20} />

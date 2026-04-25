@@ -4,6 +4,7 @@ import TokenDropdown from "./TokenDropdown";
 import SettingsModal from "./SettingsModal";
 import { useSettings } from "../lib/context/SettingsContext";
 import { dismissToast, showError, showLoading, showSuccess } from "../lib/toast";
+import { useSigningActions } from "../stores/signatureStore";
 
 export default function SwapInterface() {
   const [fromToken, setFromToken] = useState("XLM");

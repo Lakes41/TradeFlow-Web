@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { connectWallet, WalletType } from "../lib/stellar";
 import { PlusCircle, ShieldCheck, Landmark, Star } from "lucide-react";
 import LoanTable from "../components/LoanTable";
@@ -11,6 +12,7 @@ import Card from "../components/Card";
 import WalletModal from "../components/WalletModal";
 import InvoiceMintForm from "../components/InvoiceMintForm";
 import InvoiceTable from "../components/InvoiceTable";
+import InvoiceFilter, { InvoiceFilters } from "../components/InvoiceFilter";
 import NewsBanner from "../components/NewsBanner";
 import useTransactionToast from "../lib/useTransactionToast";
 import AddTrustlineButton from "../components/AddTrustlineButton";
@@ -25,6 +27,8 @@ import { RiskSocketClient } from "../lib/riskSocket";
 import { showError, showSuccess } from "../lib/toast";
 
 export default function Page() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [address, setAddress] = useState("");
   const [invoices, setInvoices] = useState<InvoiceSummary[]>([]);
   const [loading, setLoading] = useState(false);
@@ -33,6 +37,25 @@ export default function Page() {
   const [activeTab, setActiveTab] = useState("dashboard");
   const { toggleWatchlist, isInWatchlist } = useWatchlist();
   const riskSocketRef = useRef<RiskSocketClient | null>(null);
+
+  // Initialize filters from URL params
+  const [filters, setFilters] = useState<InvoiceFilters>(() => ({
+    minApy: parseFloat(searchParams.get('minApy') || '0'),
+    maxApy: parseFloat(searchParams.get('maxApy') || '25'),
+    tiers: searchParams.get('tiers')?.split(',').filter(Boolean) || [],
+  }));
+
+  // Update URL when filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (filters.minApy > 0) params.set('minApy', filters.minApy.toString());
+    if (filters.maxApy < 25) params.set('maxApy', filters.maxApy.toString());
+    if (filters.tiers.length > 0) params.set('tiers', filters.tiers.join(','));
+    
+    const queryString = params.toString();
+    const newUrl = queryString ? `/?${queryString}` : '/';
+    router.replace(newUrl);
+  }, [filters, router]);
 
   // 1. Connect Stellar Wallet (supports Freighter, Albedo, xBull)
   const handleConnectWallet = async (walletType: WalletType) => {
@@ -164,20 +187,11 @@ export default function Page() {
           onTabChange={setActiveTab}
         />
 
-        {/* Main Content */}
-        <div className="flex-1 px-4 lg:px-8">
-          {/* Tab Navigation */}
-          <TabNavigation
-            tabs={tabs}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
-
-          {/* Tab Content */}
-          {activeTab === "watchlist" ? (
-            <WatchlistTab />
-          ) : (
-            <>
+        {/* Tab Content */}
+        {activeTab === "watchlist" ? (
+          <WatchlistTab />
+        ) : (
+          <>
               {/* Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                 <Card>
@@ -290,6 +304,20 @@ export default function Page() {
                     )}
                   </tbody>
                 </table>
+              {/* Invoice Table with Filters */}
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-12">
+                {/* Filter Sidebar */}
+                <div className="lg:col-span-1">
+                  <InvoiceFilter
+                    filters={filters}
+                    onFiltersChange={setFilters}
+                  />
+                </div>
+
+                {/* Invoice Table */}
+                <div className="lg:col-span-3">
+                  <InvoiceTable filters={filters} />
+                </div>
               </div>
 
               {/* Active Loans Table (Issue #6) */}
