@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Server, Asset } from 'soroban-client';
-import { walletKit, FREIGHTER_ID, WalletType } from '../lib/stellar';
+import { FREIGHTER_ID, WalletType } from '../lib/stellar';
+import { createWalletConnector, getWalletDisplayName } from '../lib/walletConnector';
 
 // Network configuration
 export const NETWORKS = {
@@ -64,7 +65,7 @@ export const useWeb3Store = create<Web3Store>((set, get) => ({
   isLoading: false,
   error: null,
 
-  // Connect wallet using wallet kit
+  // Connect wallet using unified wallet connector
   connectWallet: async (walletType: WalletType = FREIGHTER_ID) => {
     const { isConnected } = get();
     
@@ -73,35 +74,29 @@ export const useWeb3Store = create<Web3Store>((set, get) => ({
       return;
     }
 
-    if (!walletKit) {
-      set({ error: 'Wallet kit is not available in this environment' });
-      return;
-    }
-
     set({ isConnecting: true, error: null });
 
     try {
-      // Set the wallet type
-      walletKit.setWallet(walletType);
+      const walletConnector = createWalletConnector(walletType);
       
-      // Get public key / address
-      const { address: publicKey } = await walletKit.getAddress();
+      // Connect to wallet
+      const walletInfo = await walletConnector.connect();
       
-      if (!publicKey) {
+      if (!walletInfo.publicKey) {
         throw new Error('Unable to retrieve public key.');
       }
 
       // Verify correct network (Testnet)
-      const { network } = await walletKit.getNetwork();
+      const network = await walletConnector.getNetwork();
       if (network !== "TESTNET" && !network.includes("Test SDF Network")) {
-        const walletName = getWalletName(walletType);
+        const walletName = getWalletDisplayName(walletType);
         throw new Error(`Invalid network: ${network}. Please switch to TESTNET in ${walletName} settings.`);
       }
 
       // Update state with connected wallet
       set({
-        walletAddress: publicKey,
-        walletType,
+        walletAddress: walletInfo.publicKey,
+        walletType: walletInfo.walletType,
         isConnected: true,
         isConnecting: false,
         error: null
@@ -121,9 +116,12 @@ export const useWeb3Store = create<Web3Store>((set, get) => ({
 
   // Disconnect wallet
   disconnectWallet: async () => {
+    const { walletType } = get();
+    
     try {
-      if (walletKit && walletKit.disconnect) {
-        await walletKit.disconnect();
+      if (walletType) {
+        const walletConnector = createWalletConnector(walletType);
+        await walletConnector.disconnect();
       }
     } catch (error) {
       console.error('Wallet disconnection error:', error);
@@ -238,19 +236,6 @@ export const useWeb3Store = create<Web3Store>((set, get) => ({
   }
 }));
 
-// Helper function to get wallet display name
-function getWalletName(walletType: WalletType): string {
-  switch (walletType) {
-    case FREIGHTER_ID:
-      return "Freighter";
-    case 'xbull':
-      return "xBull";
-    case 'albedo':
-      return "Albedo";
-    default:
-      return "Wallet";
-  }
-}
 
 // Selectors for common use cases
 export const useWalletConnection = () => {

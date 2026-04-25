@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { X, Loader2, AlertCircle, CheckCircle } from "lucide-react";
 import Card from "./Card";
 import Button from "./ui/Button";
+import { signTransaction } from "../lib/stellar";
 
 interface TransactionSignatureModalProps {
   isOpen: boolean;
@@ -41,13 +42,8 @@ export default function TransactionSignatureModal({
     try {
       setSignatureState("waiting");
       
-      // Check if Freighter is installed
-      if (!window.freight) {
-        throw new Error("Freighter wallet is not installed");
-      }
-
-      // Request wallet signature
-      const signedXDR = await window.freight.signTransaction(transactionXDR);
+      // Use the unified signTransaction function that works with all wallets
+      const signedXDR = await signTransaction(transactionXDR);
       
       if (!signedXDR) {
         throw new Error("Failed to get signature from wallet");
@@ -72,8 +68,8 @@ export default function TransactionSignatureModal({
       // Handle specific user rejection
       if (err.message?.includes("User rejected") || err.message?.includes("declined") || err.message?.includes("cancelled")) {
         setError("Transaction cancelled by user");
-      } else if (err.message?.includes("Freighter")) {
-        setError("Freighter wallet error: " + err.message);
+      } else if (err.message?.includes("wallet")) {
+        setError("Wallet error: " + err.message);
       } else {
         setError("Transaction failed: " + (err.message || "Unknown error"));
       }
@@ -136,7 +132,7 @@ export default function TransactionSignatureModal({
           {/* Description */}
           <p className="text-slate-400 mb-6">
             {signatureState === "waiting" && 
-              "Please approve the transaction in your Freighter wallet extension."
+              "Please approve the transaction in your wallet."
             }
             {signatureState === "broadcasting" && 
               "Your signed transaction is being broadcast to the Stellar network."
@@ -220,11 +216,3 @@ export default function TransactionSignatureModal({
   );
 }
 
-// Extend Window interface for Freighter
-declare global {
-  interface Window {
-    freight?: {
-      signTransaction: (xdr: string) => Promise<string>;
-    };
-  }
-}
