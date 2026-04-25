@@ -1,34 +1,47 @@
 "use client";
 
-import React from "react";
-import SwapInterface from "../../components/SwapInterface";
-import Footer from "../../components/layout/Footer";
-import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import React, { useState } from "react";
+import { connectWallet, WalletType } from "@/lib/stellar";
+import  Navbar from "@/components/Navbar";
+import WalletModal from "@/components/WalletModal";
+import { SwapCard } from "@/components/SwapCard";
+import WalletNotConnected from "@/components/WalletNotConnected";
 
 export default function SwapPage() {
+  const [address, setAddress] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleConnectWallet = async (walletType: WalletType) => {
+    try {
+      const userInfo = await connectWallet(walletType);
+      if (userInfo && userInfo.publicKey) {
+        setAddress(userInfo.publicKey);
+      }
+    } catch (e: any) {
+      console.error("Connection failed:", e.message);
+      alert(e.message || "Failed to connect to wallet.");
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col">
-      {/* Header */}
-      <div className="p-8 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link 
-            href="/" 
-            className="p-2 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-white transition-all"
-          >
-            <ArrowLeft size={24} />
-          </Link>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Swap <span className="text-blue-400">Assets</span>
-          </h1>
-        </div>
+    <div className="min-h-screen bg-tradeflow-dark text-white font-sans flex flex-col">
+      <Navbar address={address} onConnect={() => setIsModalOpen(true)} />
+
+      <div className="flex-1 px-8">
+        {!address ? (
+          <WalletNotConnected onConnect={() => setIsModalOpen(true)} />
+        ) : (
+          <div className="flex items-center justify-center py-12">
+            <SwapCard />
+          </div>
+        )}
       </div>
 
-      <main className="flex-1 flex items-center justify-center p-8">
-        <SwapInterface />
-      </main>
-
-      <Footer />
+      <WalletModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onConnect={handleConnectWallet}
+      />
     </div>
   );
 }

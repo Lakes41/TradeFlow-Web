@@ -9,15 +9,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        "tradeflow-dark": "#0a0f1e",
-        "tradeflow-muted": "#4a5568",
+        "tradeflow-dark": "#0a0a0f",
+        "tradeflow-secondary": "#12121a",
+        "tradeflow-muted": "#2a2a3a",
+        "tradeflow-accent": "#3b82f6",
       },
       fontFamily: {
         sans: ["var(--font-inter)", "sans-serif"],
       },
     },
   },
-  plugins: [],
+  plugins: [require("tailwind-scrollbar")],
 };
 
 export default config;
