@@ -6,6 +6,7 @@ import StickyHeader from "../../../components/StickyHeader";
 import FractionalPurchaseModal, {
   type Invoice,
 } from "../../../components/FractionalPurchaseModal";
+import DynamicRiskAssessmentChart from "../../../components/DynamicRiskAssessmentChart";
 import { useTokenStore } from "../../../stores/tokenStore";
 import { ArrowLeft, ExternalLink, Shield, TrendingUp } from "lucide-react";
 import Link from "next/link";
@@ -25,6 +26,16 @@ const INVOICE_DATA: Invoice = {
   apy: 8.5,
   dueDate: "2026-12-15",
   currency: "USDC",
+};
+
+// Mock risk assessment data - replace with real data from TradeFlow API
+const MOCK_RISK_DATA = {
+  creditScore: 85,
+  paymentHistory: 92,
+  marketSectorRisk: 78,
+  collateralRatio: 75,
+  liquidityScore: 90,
+  debtToIncomeRatio: 68,
 };
 
 export default function InvoiceDetailPage() {
@@ -190,44 +201,12 @@ export default function InvoiceDetailPage() {
             </div>
           </div>
 
-          {/* Sidebar — unchanged */}
+          {/* Sidebar */}
           <div className="space-y-6">
-            <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-6">
-              <div className="flex items-center gap-2 mb-4">
-                <Shield className="text-blue-400" size={20} />
-                <h2 className="text-xl font-semibold">Risk Assessment</h2>
-              </div>
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm">Credit Score</span>
-                    <span className="text-sm font-medium">A+</span>
-                  </div>
-                  <div className="w-full bg-slate-700 h-2 rounded-full">
-                    <div className="bg-green-500 h-2 rounded-full" style={{ width: "85%" }} />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm">Collateral Ratio</span>
-                    <span className="text-sm font-medium">150%</span>
-                  </div>
-                  <div className="w-full bg-slate-700 h-2 rounded-full">
-                    <div className="bg-blue-500 h-2 rounded-full" style={{ width: "75%" }} />
-                  </div>
-                </div>
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm">Liquidity Score</span>
-                    <span className="text-sm font-medium">High</span>
-                  </div>
-                  <div className="w-full bg-slate-700 h-2 rounded-full">
-                    <div className="bg-purple-500 h-2 rounded-full" style={{ width: "90%" }} />
-                  </div>
-                ))}
-              </div>
-            </div>
+            {/* Risk Assessment Chart */}
+            <DynamicRiskAssessmentChart data={MOCK_RISK_DATA} />
 
+            {/* Quick Actions */}
             <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-6">
               <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
               <div className="space-y-3">
@@ -247,17 +226,17 @@ export default function InvoiceDetailPage() {
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Fractional Purchase Modal */}
-      {showBuyModal && (
-        <FractionalPurchaseModal
-          invoice={INVOICE_DATA}
-          walletBalance={usdcBalance}
-          onClose={() => setShowBuyModal(false)}
-          onBuyFraction={handleBuyFraction}
-        />
-      )}
+        {/* Fractional Purchase Modal */}
+        {showBuyModal && (
+          <FractionalPurchaseModal
+            invoice={INVOICE_DATA}
+            walletBalance={usdcBalance}
+            onClose={() => setShowBuyModal(false)}
+            onBuyFraction={handleBuyFraction}
+          />
+        )}
+      </div>
     </div>
   );
 }

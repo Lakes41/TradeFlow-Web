@@ -1,5 +1,6 @@
 import axios, {
   AxiosError,
+  AxiosHeaders,
   AxiosInstance,
   AxiosRequestConfig,
   AxiosResponse,
@@ -76,9 +77,10 @@ function shouldRetry(error: AxiosError, config: RetryableConfig, maxRetries: num
 }
 
 function getBackoffDelayMs(retryCount: number): number {
-  const base = 300 * Math.pow(2, retryCount);
-  const jitter = Math.floor(Math.random() * 100);
-  return Math.min(base + jitter, 2000);
+  // Exponential backoff: 1s, 2s, 4s for 429 status codes
+  const base = 1000 * Math.pow(2, retryCount);
+  const jitter = Math.floor(Math.random() * 200);
+  return Math.min(base + jitter, 8000);
 }
 
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
@@ -153,7 +155,7 @@ export function normalizeHttpError(error: unknown): {
 export function createHttpClient(options: HttpClientOptions = {}): AxiosInstance {
   const baseURL = options.baseURL ?? getApiBaseUrl();
   const timeout = options.timeoutMs ?? 15000;
-  const maxRetries = options.maxRetries ?? 2;
+  const maxRetries = options.maxRetries ?? 3;
 
   const instance = axios.create({
     baseURL,
@@ -180,26 +182,45 @@ export function createHttpClient(options: HttpClientOptions = {}): AxiosInstance
   instance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     const token = getAuthToken();
     if (token) {
-      config.headers = config.headers ?? {};
-      (config.headers as any).Authorization = `Bearer ${token}`;
+      if (!config.headers) {
+        config.headers = new AxiosHeaders();
+      }
+      config.headers.set("Authorization", `Bearer ${token}`);
     }
 
-    config.headers = config.headers ?? {};
-    (config.headers as any)["X-Requested-With"] = "XMLHttpRequest";
+    if (!config.headers) {
+      config.headers = new AxiosHeaders();
+    }
+    config.headers.set("X-Requested-With", "XMLHttpRequest");
 
     return config;
   });
 
   instance.interceptors.response.use(
-    (response) => response,
+    (response: AxiosResponse) => response,
     async (error: AxiosError) => {
       const config = (error.config || {}) as RetryableConfig;
+
+      // Show user-friendly error toast when retries are exhausted for 429
+      if (error.response?.status === 429 &&
+        (config.__retryCount ?? 0) >= maxRetries) {
+        // Dynamic import to avoid server-side rendering issues
+        if (typeof window !== 'undefined') {
+          import('sonner').then(({ toast }) => {
+            toast.error('Server is busy, please try again later', {
+              description: 'The server is experiencing high traffic. Please wait a moment and retry.',
+              duration: 5000,
+            });
+          });
+        }
+      }
+
       if (!shouldRetry(error, config, maxRetries)) {
         return Promise.reject(error);
       }
 
       config.__retryCount = (config.__retryCount ?? 0) + 1;
-      await sleep(getBackoffDelayMs(config.__retryCount), config.signal);
+      await sleep(getBackoffDelayMs(config.__retryCount), config.signal as AbortSignal);
       return instance.request(config);
     },
   );
