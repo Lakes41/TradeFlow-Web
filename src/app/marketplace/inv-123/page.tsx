@@ -1,15 +1,77 @@
 "use client";
 
-import React from 'react';
-import StickyHeader from '../../../components/StickyHeader';
-import { ArrowLeft, ExternalLink, Shield, TrendingUp } from 'lucide-react';
-import Link from 'next/link';
+import React, { useState, useEffect } from "react";
+import { Server } from "soroban-client";
+import StickyHeader from "../../../components/StickyHeader";
+import FractionalPurchaseModal, {
+  type Invoice,
+} from "../../../components/FractionalPurchaseModal";
+import { useTokenStore } from "../../../stores/tokenStore";
+import { ArrowLeft, ExternalLink, Shield, TrendingUp } from "lucide-react";
+import Link from "next/link";
+
+// Stellar testnet USDC issuer
+const USDC_CODE = "USDC";
+const USDC_ISSUER = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";
+
+const server = new Server("https://soroban-testnet.stellar.org", {
+  allowHttp: true,
+});
+
+// TODO: Replace with real invoice data from your API / contract query
+const INVOICE_DATA: Invoice = {
+  id: "INV-00123",
+  faceValue: 50000,
+  apy: 8.5,
+  dueDate: "2026-12-15",
+  currency: "USDC",
+};
 
 export default function InvoiceDetailPage() {
+  const { publicKey, isConnected } = useTokenStore();
+  const [showBuyModal, setShowBuyModal] = useState(false);
+  const [usdcBalance, setUsdcBalance] = useState("0");
+
+  // Fetch live USDC balance from Stellar network whenever wallet connects
+  useEffect(() => {
+    if (!isConnected || !publicKey) {
+      setUsdcBalance("0");
+      return;
+    }
+
+    const fetchBalance = async () => {
+      try {
+        const accountResponse = await server.accounts().accountId(publicKey).call();
+        const usdcEntry = accountResponse.balances.find(
+          (b: any) =>
+            b.asset_code === USDC_CODE && b.asset_issuer === USDC_ISSUER
+        );
+        setUsdcBalance(usdcEntry ? usdcEntry.balance : "0");
+      } catch {
+        setUsdcBalance("0");
+      }
+    };
+
+    fetchBalance();
+  }, [isConnected, publicKey]);
+
+  const handleBuyFraction = async (
+    amountStroops: string,
+    invoiceId: string
+  ) => {
+    // TODO: Replace with your real Soroban client call, e.g.:
+    // await sorobanClient.buy_fraction({
+    //   invoice_id: invoiceId,
+    //   amount: BigInt(amountStroops),
+    // });
+    console.log("buy_fraction called:", { invoiceId, amountStroops });
+    await new Promise((r) => setTimeout(r, 1500));
+  };
+
   return (
     <div className="min-h-screen bg-tradeflow-dark text-white font-sans">
       {/* Sticky Header */}
-      <StickyHeader 
+      <StickyHeader
         title="INV-123"
         subtitle="Real World Asset token details and performance metrics"
         actions={
@@ -21,7 +83,10 @@ export default function InvoiceDetailPage() {
               <ArrowLeft size={16} />
               Back
             </Link>
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">
+            <button
+              onClick={() => setShowBuyModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+            >
               <ExternalLink size={16} />
               Trade
             </button>
@@ -32,7 +97,7 @@ export default function InvoiceDetailPage() {
       {/* Main Content */}
       <div className="px-4 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
+          {/* Left Column */}
           <div className="lg:col-span-2 space-y-6">
             {/* Invoice Overview */}
             <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-6">
@@ -56,7 +121,7 @@ export default function InvoiceDetailPage() {
                 </div>
                 <div>
                   <p className="text-slate-400 text-sm mb-1">Maturity Date</p>
-                  <p className="font-medium">Dec 15, 2024</p>
+                  <p className="font-medium">Dec 15, 2026</p>
                 </div>
                 <div>
                   <p className="text-slate-400 text-sm mb-1">Status</p>
@@ -86,11 +151,14 @@ export default function InvoiceDetailPage() {
               <h2 className="text-xl font-semibold mb-4">Transaction History</h2>
               <div className="space-y-3">
                 {[
-                  { date: '2024-01-15', type: 'Payment', amount: '$2,125', status: 'Completed' },
-                  { date: '2024-01-01', type: 'Payment', amount: '$2,125', status: 'Completed' },
-                  { date: '2023-12-15', type: 'Initial', amount: '$50,000', status: 'Completed' },
+                  { date: "2024-01-15", type: "Payment", amount: "$2,125", status: "Completed" },
+                  { date: "2024-01-01", type: "Payment", amount: "$2,125", status: "Completed" },
+                  { date: "2023-12-15", type: "Initial", amount: "$50,000", status: "Completed" },
                 ].map((tx, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg"
+                  >
                     <div>
                       <p className="font-medium">{tx.type}</p>
                       <p className="text-slate-400 text-sm">{tx.date}</p>
@@ -120,7 +188,7 @@ export default function InvoiceDetailPage() {
                     <span className="text-sm font-medium">A+</span>
                   </div>
                   <div className="w-full bg-slate-700 h-2 rounded-full">
-                    <div className="bg-green-500 h-2 rounded-full" style={{ width: '85%' }}></div>
+                    <div className="bg-green-500 h-2 rounded-full" style={{ width: "85%" }} />
                   </div>
                 </div>
                 <div>
@@ -129,7 +197,7 @@ export default function InvoiceDetailPage() {
                     <span className="text-sm font-medium">150%</span>
                   </div>
                   <div className="w-full bg-slate-700 h-2 rounded-full">
-                    <div className="bg-blue-500 h-2 rounded-full" style={{ width: '75%' }}></div>
+                    <div className="bg-blue-500 h-2 rounded-full" style={{ width: "75%" }} />
                   </div>
                 </div>
                 <div>
@@ -138,7 +206,7 @@ export default function InvoiceDetailPage() {
                     <span className="text-sm font-medium">High</span>
                   </div>
                   <div className="w-full bg-slate-700 h-2 rounded-full">
-                    <div className="bg-purple-500 h-2 rounded-full" style={{ width: '90%' }}></div>
+                    <div className="bg-purple-500 h-2 rounded-full" style={{ width: "90%" }} />
                   </div>
                 </div>
               </div>
@@ -148,8 +216,11 @@ export default function InvoiceDetailPage() {
             <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-6">
               <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
               <div className="space-y-3">
-                <button className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors">
-                  Buy More Tokens
+                <button
+                  onClick={() => setShowBuyModal(true)}
+                  className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                >
+                  Buy Fraction
                 </button>
                 <button className="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors">
                   View Documents
@@ -162,6 +233,16 @@ export default function InvoiceDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Fractional Purchase Modal */}
+      {showBuyModal && (
+        <FractionalPurchaseModal
+          invoice={INVOICE_DATA}
+          walletBalance={usdcBalance}
+          onClose={() => setShowBuyModal(false)}
+          onBuyFraction={handleBuyFraction}
+        />
+      )}
     </div>
   );
 }
