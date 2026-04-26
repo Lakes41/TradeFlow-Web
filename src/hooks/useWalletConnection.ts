@@ -127,6 +127,62 @@ export function useWalletConnection() {
     }
   }, [isInitialized, revalidateConnection]);
 
+  // Automatic reconnection on app load
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    const attemptAutoReconnect = async () => {
+      const cached = getCachedWalletConnection();
+      
+      if (cached.isCached && cached.isConnected && cached.walletAddress && cached.walletType) {
+        try {
+          // Create wallet connector and check if still connected
+          const connector = createWalletConnector(cached.walletType);
+          const isConnected = await connector.isConnected();
+          
+          if (isConnected) {
+            // Get current public key to verify it matches cached one
+            const currentPublicKey = await connector.getPublicKey();
+            
+            if (currentPublicKey === cached.walletAddress) {
+              // Auto-reconnect successful - update store state
+              web3Store.walletAddress = cached.walletAddress;
+              web3Store.walletType = cached.walletType;
+              web3Store.isConnected = true;
+              tokenStore.setConnected(true, cached.walletAddress);
+              
+              // Update cache timestamp
+              updateCacheTimestamp();
+              
+              // Refresh balances
+              try {
+                await web3Store.updateBalances();
+              } catch (balanceError) {
+                console.warn('Failed to refresh balances during auto-reconnect:', balanceError);
+              }
+              
+              console.log('Auto-reconnected to wallet:', cached.walletAddress);
+            } else {
+              // Public key changed, clear cache
+              clearWalletCache();
+              console.log('Wallet public key changed, clearing cache');
+            }
+          } else {
+            // Not connected anymore, clear cache
+            clearWalletCache();
+            console.log('Wallet no longer connected, clearing cache');
+          }
+        } catch (error) {
+          console.error('Auto-reconnection failed:', error);
+          // Clear cache on failure
+          clearWalletCache();
+        }
+      }
+    };
+
+    attemptAutoReconnect();
+  }, [isInitialized, web3Store, tokenStore]);
+
   // Periodic revalidation (every 2 minutes)
   useEffect(() => {
     if (!web3Store.isConnected) return;

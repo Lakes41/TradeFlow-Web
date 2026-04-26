@@ -14,6 +14,7 @@ import QueryProvider from "../providers/QueryClientProvider";
 import { SettingsProvider } from "../lib/context/SettingsContext";
 import NetworkGuard from "../components/general/NetworkGuard";
 import SignatureOverlay from "../components/SignatureOverlay";
+import { NetworkMismatchWarning } from "../components/NetworkMismatchWarning";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <NetworkGuard>
               <NetworkCongestionProvider>
                 <SlippageProvider>
+                  <NetworkMismatchWarning />
                   <Toaster />
                   <NetworkCongestionBanner />
                   <QueryProvider>
@@ -45,37 +47,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </NetworkGuard>
           </SettingsProvider>
         </ErrorBoundary>
-      <body className={`${inter.variable} font-sans antialiased`}>
-        <ErrorBoundary>
-          <SettingsProvider>
-            <NetworkCongestionProvider>
-              <SlippageProvider>
-                <QueryProvider>
-                  <NetworkGuard>
-                    <ToasterProvider />
-                    <NetworkCongestionBanner />
-                    <PageTransition>
-                      {children}
-                    </PageTransition>
-                    <SignatureOverlay />
-                    <Footer />
-                  </NetworkGuard>
-                </QueryProvider>
-              </SlippageProvider>
-            </NetworkCongestionProvider>
-          </SettingsProvider>
-        </ErrorBoundary>
-        <html lang="en" className={inter.variable}>
-          <body className="font-sans">
-            <SettingsProvider>
-              <NetworkGuard>
-                {children}
-                <ToasterProvider />
-              </NetworkGuard>
-            </SettingsProvider>
-          </body>
-        </html>
-        );
       </body>
     </html>
   );
