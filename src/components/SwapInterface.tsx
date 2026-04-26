@@ -4,6 +4,7 @@ import TokenDropdown from "./TokenDropdown";
 import SettingsModal from "./SettingsModal";
 import { useSettings } from "../lib/context/SettingsContext";
 import { useSigningActions } from "../stores/signatureStore";
+import Icon from "./ui/Icon";
 
 export default function SwapInterface() {
   const [fromToken, setFromToken] = useState("XLM");
@@ -173,7 +174,7 @@ export default function SwapInterface() {
       <div className="flex justify-between items-center bg-slate-800/40 backdrop-blur-sm border border-slate-700/50 p-4 rounded-2xl">
         <div className="flex items-center gap-3">
           <div className={`p-2 rounded-xl ${isProMode ? "bg-blue-500/20 text-blue-400" : "bg-slate-700 text-slate-400"}`}>
-            <BarChart3 size={20} />
+            <Icon icon={BarChart3} />
           </div>
           <div>
             <h3 className="font-semibold text-white">Pro Mode</h3>
@@ -199,7 +200,7 @@ export default function SwapInterface() {
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent pointer-events-none" />
           <div className="relative z-10 flex flex-col items-center gap-4 text-center">
             <div className="p-4 bg-blue-500/10 rounded-full text-blue-400 animate-pulse">
-              <TrendingUp size={32} />
+              <Icon icon={TrendingUp} />
             </div>
             <div>
               <h3 className="text-xl font-bold text-white mb-2">Advanced Chart Area</h3>
@@ -222,7 +223,7 @@ export default function SwapInterface() {
               onClick={() => setIsSettingsOpen(true)}
               className="p-2 hover:bg-slate-700 rounded-xl text-slate-400 hover:text-white transition-all transform hover:rotate-90"
             >
-              <Settings size={20} />
+              <Icon icon={Settings} />
             </button>
           </div>
           
@@ -245,7 +246,7 @@ export default function SwapInterface() {
               onClick={handleSwap}
               className="bg-blue-600 hover:bg-blue-500 p-3 rounded-2xl transition-all shadow-xl shadow-blue-900/40 border-4 border-slate-800 transform hover:scale-110 active:scale-95"
             >
-              <ArrowUpDown size={20} className="text-white" />
+              <ArrowUpDown className="text-white" />
             </button>
           </div>
 
@@ -274,11 +275,14 @@ export default function SwapInterface() {
           </div>
 
           {/* Action Button */}
-          <button className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-900/20 text-lg">
-            Swap Assets
+          <button 
+            className={`w-full ${buttonState.className} text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-blue-900/20 text-lg`}
+            disabled={buttonState.disabled}
+          >
+            {buttonState.text}
           </button>
         </div>
-      </Card>
+      </div>
 
       {/* Modals */}
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />

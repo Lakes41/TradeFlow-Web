@@ -3,6 +3,7 @@
 import React from "react";
 import { X, Info } from "lucide-react";
 import { useSettings } from "../lib/context/SettingsContext";
+import Icon from "./ui/Icon";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -25,7 +26,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             onClick={onClose}
             className="p-2 hover:bg-slate-800 rounded-xl text-slate-400 hover:text-white transition-all"
           >
-            <X size={20} />
+            <Icon icon={X} />
           </button>
         </div>
 
@@ -36,7 +37,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
                 Slippage Tolerance
                 <div className="group relative">
-                  <Info size={14} className="text-slate-500 cursor-help" />
+                  <Icon icon={Info} dense className="text-slate-500 cursor-help" />
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-slate-800 text-xs text-slate-300 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700 shadow-xl">
                     Your transaction will revert if the price changes unfavorably by more than this percentage.
                   </div>
@@ -79,7 +80,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
                 Transaction Deadline
                 <div className="group relative">
-                  <Info size={14} className="text-slate-500 cursor-help" />
+                  <Icon icon={Info} dense className="text-slate-500 cursor-help" />
                   <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-slate-800 text-xs text-slate-300 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none border border-slate-700 shadow-xl">
                     Your transaction will revert if it remains pending for longer than this time.
                   </div>

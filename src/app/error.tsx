@@ -4,6 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { ServerCrash, RotateCw, Home } from 'lucide-react';
 import * as Sentry from '@sentry/nextjs';
+import Icon from '../components/ui/Icon';
 
 export default function ErrorPage({ error, reset }: { error: Error; reset: () => void }) {
   React.useEffect(() => {
@@ -23,7 +24,7 @@ export default function ErrorPage({ error, reset }: { error: Error; reset: () =>
         {/* Server Icon */}
         <div className="flex justify-center mb-6">
           <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center">
-            <ServerCrash size={32} className="text-blue-400" />
+            <Icon icon={ServerCrash} className="text-blue-400" size={32} />
           </div>
         </div>
 
@@ -42,7 +43,7 @@ export default function ErrorPage({ error, reset }: { error: Error; reset: () =>
             onClick={reset}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-full transition-colors text-white font-medium"
           >
-            <RotateCw size={20} />
+            <Icon icon={RotateCw} />
             Try Again
           </button>
 
@@ -50,7 +51,7 @@ export default function ErrorPage({ error, reset }: { error: Error; reset: () =>
             href="/"
             className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 px-6 py-3 rounded-full transition-colors text-white font-medium"
           >
-            <Home size={20} />
+            <Icon icon={Home} />
             Back to Dashboard
           </Link>
         </div>
