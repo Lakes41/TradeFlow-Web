@@ -8,6 +8,7 @@ import { getCachedWalletConnection } from "../lib/walletCache";
 import { LogOut, ChevronDown } from "lucide-react";
 import WalletModal from "./WalletModal";
 import AuthenticatedSkeleton from "./AuthenticatedSkeleton";
+import Icon from "./ui/Icon";
 
 const RECENT_TOKENS_KEY = "tradeflow_recent_tokens";
 
@@ -98,7 +99,7 @@ export default function ConnectWallet() {
                         >
                               <span className="w-2 h-2 rounded-full bg-green-400 shrink-0" />
                               {`${pubKey.slice(0, 4)}...${pubKey.slice(-4)}`}
-                              <ChevronDown size={14} className={`transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
+                              <Icon icon={ChevronDown} dense className={`transition-transform ${isDropdownOpen ? "rotate-180" : ""}`} />
                         </button>
 
                         {isDropdownOpen && (
@@ -111,7 +112,7 @@ export default function ConnectWallet() {
                                           onClick={handleDisconnect}
                                           className="w-full flex items-center gap-2 px-3 py-2.5 text-sm text-slate-300 hover:bg-red-500/10 hover:text-red-400 transition-colors"
                                     >
-                                          <LogOut size={14} />
+                                          <Icon icon={LogOut} dense />
                                           Disconnect Wallet
                                     </button>
                               </div>

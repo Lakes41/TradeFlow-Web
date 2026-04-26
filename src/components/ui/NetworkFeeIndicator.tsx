@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Fuel } from 'lucide-react';
+import Icon from './Icon';
 
 interface FeeData {
   baseFee: number;
@@ -57,7 +58,7 @@ export default function NetworkFeeIndicator() {
   if (loading && !feeData) {
     return (
       <div className="flex items-center gap-1.5 text-xs text-slate-400">
-        <Fuel size={16} />
+        <Icon icon={Fuel} dense />
         <span>Loading fee...</span>
       </div>
     );
@@ -66,7 +67,7 @@ export default function NetworkFeeIndicator() {
   if (error || !feeData) {
     return (
       <div className="flex items-center gap-1.5 text-xs text-red-400">
-        <Fuel size={16} />
+        <Icon icon={Fuel} dense />
         <span>Fee unavailable</span>
       </div>
     );
@@ -74,8 +75,9 @@ export default function NetworkFeeIndicator() {
 
   return (
     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800/50 border border-slate-700 hover:border-slate-600 transition-colors group">
-      <Fuel 
-        size={16} 
+      <Icon 
+        icon={Fuel}
+        dense
         className={`transition-colors ${getFeeColor(feeData.baseFee)}`} 
       />
       <div className="flex items-baseline gap-1">

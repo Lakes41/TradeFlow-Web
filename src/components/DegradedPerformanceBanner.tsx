@@ -3,6 +3,7 @@
 import React from 'react';
 import { AlertTriangle, RefreshCw, X, Wifi, WifiOff } from 'lucide-react';
 import { useBackendHealth } from '../contexts/BackendHealthContext';
+import Icon from './ui/Icon';
 
 export default function DegradedPerformanceBanner() {
   const { healthState, resetHealth, isDegraded, isOffline } = useBackendHealth();
@@ -27,7 +28,7 @@ export default function DegradedPerformanceBanner() {
   const getBannerContent = () => {
     if (isOffline) {
       return {
-        icon: <WifiOff size={20} />,
+        icon: <Icon icon={WifiOff} />,
         bgColor: 'bg-red-500/10',
         borderColor: 'border-red-500/30',
         iconColor: 'text-red-400',
@@ -39,7 +40,7 @@ export default function DegradedPerformanceBanner() {
     }
 
     return {
-      icon: <AlertTriangle size={20} />,
+      icon: <Icon icon={AlertTriangle} />,
       bgColor: 'bg-yellow-500/10',
       borderColor: 'border-yellow-500/30',
       iconColor: 'text-yellow-400',
@@ -76,7 +77,7 @@ export default function DegradedPerformanceBanner() {
               onClick={handleRetry}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium text-white ${content.actionBg} transition-colors`}
             >
-              <RefreshCw size={16} />
+              <Icon icon={RefreshCw} dense />
               {content.actionText}
             </button>
             
@@ -85,7 +86,7 @@ export default function DegradedPerformanceBanner() {
               className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors"
               title="Dismiss"
             >
-              <X size={16} />
+              <Icon icon={X} dense />
             </button>
           </div>
         </div>

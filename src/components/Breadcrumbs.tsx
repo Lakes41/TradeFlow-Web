@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronRight, Home } from 'lucide-react';
 import { generateBreadcrumbs } from '../lib/breadcrumbs';
+import Icon from './ui/Icon';
 
 export default function Breadcrumbs() {
   const pathname = usePathname();
@@ -19,19 +20,13 @@ export default function Breadcrumbs() {
         return (
           <React.Fragment key={breadcrumb.href}>
             {index > 0 && (
-              <ChevronRight
-                size={16}
-                className="text-slate-600 shrink-0"
-              />
+              <Icon icon={ChevronRight} dense className="text-slate-600 shrink-0" />
             )}
 
             <div className="flex items-center gap-1">
               {isFirst && (
-                <Home
-                  size={16}
-                  className={`${isLast ? 'text-blue-400' : 'text-slate-400 hover:text-white'
-                    } transition-colors`}
-                />
+                <Icon icon={Home} dense className={`${isLast ? 'text-blue-400' : 'text-slate-400 hover:text-white'
+                    } transition-colors`} />
               )}
 
               {isLast ? (

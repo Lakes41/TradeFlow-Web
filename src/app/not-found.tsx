@@ -3,6 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { Home, Search } from "lucide-react";
+import Icon from "../components/ui/Icon";
 
 export default function NotFound() {
   return (
@@ -29,7 +30,7 @@ export default function NotFound() {
             href="/"
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-full transition-colors text-white font-medium"
           >
-            <Home size={20} />
+            <Icon icon={Home} />
             Back to Dashboard
           </Link>
           
@@ -37,7 +38,7 @@ export default function NotFound() {
             onClick={() => window.history.back()}
             className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 px-6 py-3 rounded-full transition-colors text-white font-medium"
           >
-            <Search size={20} />
+            <Icon icon={Search} />
             Go Back
           </button>
         </div>

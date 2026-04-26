@@ -3,6 +3,7 @@
 import React from "react";
 import { AlertTriangle, X, ArrowRight } from "lucide-react";
 import Card from "./Card";
+import Icon from "./ui/Icon";
 
 interface HighSlippageWarningProps {
   isOpen: boolean;
@@ -25,7 +26,7 @@ export default function HighSlippageWarning({
         <div className="flex justify-between items-start mb-6">
           <div className="flex items-center gap-3 text-red-500">
             <div className="p-2 bg-red-500/10 rounded-lg">
-              <AlertTriangle size={24} />
+              <Icon icon={AlertTriangle} />
             </div>
             <h2 className="text-xl font-bold text-white">High Price Impact</h2>
           </div>
@@ -33,7 +34,7 @@ export default function HighSlippageWarning({
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors"
           >
-            <X size={20} />
+            <Icon icon={X} />
           </button>
         </div>
 
@@ -67,7 +68,7 @@ export default function HighSlippageWarning({
             className="w-full py-4 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl transition-all flex items-center justify-center gap-2 group shadow-lg shadow-red-900/20"
           >
             Swap Anyway
-            <ArrowRight size={18} className="translate-x-0 group-hover:translate-x-1 transition-transform" />
+            <Icon icon={ArrowRight} dense className="translate-x-0 group-hover:translate-x-1 transition-transform" />
           </button>
           <button
             onClick={onClose}

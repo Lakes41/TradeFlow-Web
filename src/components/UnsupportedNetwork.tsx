@@ -2,6 +2,7 @@
 
 import React from "react";
 import { AlertTriangle, RefreshCw, ExternalLink } from "lucide-react";
+import Icon from "./ui/Icon";
 
 interface UnsupportedNetworkProps {
   currentNetwork: string;
@@ -18,7 +19,7 @@ export default function UnsupportedNetwork({ currentNetwork, expectedNetwork }: 
         <div className="mb-8 relative">
           <div className="absolute inset-0 bg-red-500 blur-2xl opacity-20 animate-pulse" />
           <div className="relative bg-red-500/10 border border-red-500/50 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto text-red-500">
-            <AlertTriangle size={40} />
+            <Icon icon={AlertTriangle} />
           </div>
         </div>
 
@@ -55,7 +56,7 @@ export default function UnsupportedNetwork({ currentNetwork, expectedNetwork }: 
             onClick={() => window.location.reload()}
             className="w-full bg-white text-slate-950 font-bold py-4 rounded-2xl flex items-center justify-center gap-2 hover:bg-slate-200 transition-all shadow-xl"
           >
-            <RefreshCw size={18} />
+            <Icon icon={RefreshCw} />
             Check Connection Again
           </button>
           
@@ -65,7 +66,7 @@ export default function UnsupportedNetwork({ currentNetwork, expectedNetwork }: 
             rel="noopener noreferrer"
             className="inline-flex items-center gap-2 text-slate-500 hover:text-slate-300 text-xs font-medium transition-colors mt-4"
           >
-            Freighter Documentation <ExternalLink size={12} />
+            Freighter Documentation <Icon icon={ExternalLink} dense />
           </a>
         </div>
 

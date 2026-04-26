@@ -8,6 +8,7 @@ import { X, Upload, Calendar, DollarSign } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Button from "./ui/Button";
 import { useMintInvoice } from "@/hooks/useMintInvoice";
+import Icon from "./ui/Icon";
 
 const invoiceSchema = z.object({
   amount: z
@@ -96,14 +97,14 @@ export default function InvoiceMintForm({ onClose, onSuccess }: InvoiceMintFormP
         <div className="flex items-center justify-between p-6 border-b border-slate-700">
           <h2 className="text-xl font-semibold text-white">Mint Invoice NFT</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
-            <X size={20} />
+            <Icon icon={X} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit(onFormSubmit)} className="p-6 space-y-6">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
-              <DollarSign size={16} className="inline mr-1" />
+              <Icon icon={DollarSign} dense className="inline mr-1" />
               Invoice Amount ($)
             </label>
             <input
@@ -119,7 +120,7 @@ export default function InvoiceMintForm({ onClose, onSuccess }: InvoiceMintFormP
 
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
-              <Calendar size={16} className="inline mr-1" />
+              <Icon icon={Calendar} dense className="inline mr-1" />
               Due Date
             </label>
             <input
@@ -132,7 +133,7 @@ export default function InvoiceMintForm({ onClose, onSuccess }: InvoiceMintFormP
 
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-2">
-              <Upload size={16} className="inline mr-1" />
+              <Icon icon={Upload} dense className="inline mr-1" />
               Invoice Document (PDF)
             </label>
             <div className="relative">
@@ -147,7 +148,7 @@ export default function InvoiceMintForm({ onClose, onSuccess }: InvoiceMintFormP
                 htmlFor="invoice-file"
                 className="flex items-center justify-center w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg cursor-pointer hover:bg-slate-600 transition-colors"
               >
-                <Upload size={16} className="mr-2 text-slate-400" />
+                <Icon icon={Upload} dense className="mr-2 text-slate-400" />
                 <span className="text-slate-300">{filePreview || "Choose PDF file"}</span>
               </label>
             </div>

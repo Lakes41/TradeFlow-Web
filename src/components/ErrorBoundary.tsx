@@ -2,6 +2,7 @@
 
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { AlertTriangle, RefreshCcw } from "lucide-react";
+import Icon from "./ui/Icon";
 
 interface Props {
   children?: ReactNode;
@@ -37,7 +38,7 @@ class ErrorBoundary extends Component<Props, State> {
         <div className="min-h-[400px] flex items-center justify-center p-6">
           <div className="bg-slate-900/50 border border-red-500/20 rounded-2xl p-8 max-w-md w-full text-center backdrop-blur-sm">
             <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-              <AlertTriangle className="text-red-500" size={32} />
+              <Icon icon={AlertTriangle} className="text-red-500" size={32} />
             </div>
             <h2 className="text-2xl font-bold text-white mb-2">Something went wrong</h2>
             <p className="text-slate-400 mb-8">
@@ -52,7 +53,7 @@ class ErrorBoundary extends Component<Props, State> {
               onClick={this.handleReset}
               className="w-full flex items-center justify-center gap-2 py-3 px-6 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-all shadow-lg shadow-blue-900/20"
             >
-              <RefreshCcw size={18} />
+              <Icon icon={RefreshCcw} dense />
               Reload Page
             </button>
           </div>

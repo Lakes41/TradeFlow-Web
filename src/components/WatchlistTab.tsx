@@ -69,7 +69,6 @@ export default function WatchlistTab({ className = '' }: WatchlistTabProps) {
               <StarIcon
                 isStarred={true}
                 onClick={() => removeFromWatchlist(token)}
-                size={16}
               />
             </div>
 
