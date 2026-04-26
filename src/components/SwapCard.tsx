@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ArrowDown, RefreshCw } from 'lucide-react';
 import { TokenInput } from './TokenInput';
+import Icon from './ui/Icon';
 
 export const SwapCard = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -25,8 +26,8 @@ export const SwapCard = () => {
         aria-label="Refresh data"
         disabled={isRefreshing}
       >
-        <RefreshCw 
-          size={18} 
+        <Icon 
+          icon={RefreshCw}
           className={isRefreshing ? "animate-spin text-blue-600" : ""} 
         />
       </button>
@@ -40,7 +41,7 @@ export const SwapCard = () => {
             className="rounded-xl border-4 border-white bg-gray-50 p-3 text-blue-600 hover:bg-blue-50 transition-all active:scale-90 shadow-sm"
             aria-label="Swap directions"
           >
-            <ArrowDown size={20} />
+            <Icon icon={ArrowDown} />
           </button>
         </div>
 

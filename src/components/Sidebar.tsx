@@ -3,12 +3,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { 
-  Menu, 
-  X, 
-  LayoutDashboard, 
-  TrendingUp, 
-  Briefcase, 
+import {
+  Menu,
+  X,
+  LayoutDashboard,
+  TrendingUp,
+  Briefcase,
   Settings,
   ChevronLeft,
   ChevronRight,
@@ -17,7 +17,9 @@ import {
   Check,
   CreditCard
 } from "lucide-react";
+import { showError, showSuccess } from "../lib/toast";
 import toast from "react-hot-toast";
+import Icon from "./ui/Icon";
 
 // Import existing components
 import NetworkSelector from "./NetworkSelector";
@@ -47,17 +49,17 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
     {
       name: "Marketplace",
       href: "/",
-      icon: <LayoutDashboard size={20} />,
+      icon: <Icon icon={LayoutDashboard} />,
     },
     {
       name: "Portfolio",
       href: "/portfolio",
-      icon: <Briefcase size={20} />,
+      icon: <Icon icon={Briefcase} />,
     },
     {
       name: "Settings",
       href: "/settings",
-      icon: <Settings size={20} />,
+      icon: <Icon icon={Settings} />,
     },
   ];
 
@@ -67,10 +69,10 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
         await navigator.clipboard.writeText(address);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
-        toast.success("Address copied to clipboard!");
+        showSuccess("Address copied to clipboard!");
       } catch (err) {
         console.error('Failed to copy address:', err);
-        toast.error("Failed to copy address");
+        showError("Failed to copy address");
       }
     }
   };
@@ -130,16 +132,15 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
 
   const NavItemComponent = ({ item, isMobile = false }: { item: NavItem; isMobile?: boolean }) => {
     const isActive = pathname === item.href;
-    
+
     return (
       <Link
         href={item.href}
         onClick={() => isMobile && setIsMobileMenuOpen(false)}
-        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${
-          isActive
+        className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 ${isActive
             ? "bg-blue-600/20 text-blue-400 border-l-4 border-blue-400"
             : "text-slate-400 hover:text-white hover:bg-slate-700/50"
-        } ${isCollapsed && !isMobile ? "justify-center" : ""}`}
+          } ${isCollapsed && !isMobile ? "justify-center" : ""}`}
       >
         {item.icon}
         {!isCollapsed || isMobile ? (
@@ -163,14 +164,14 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
             onClick={() => setIsMobileMenuOpen(true)}
             className="p-2 rounded-lg hover:bg-slate-700/50 transition-colors"
           >
-            <Menu size={24} />
+            <Icon icon={Menu} />
           </button>
         </div>
       </div>
 
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
-        <div 
+        <div
           className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
           onClick={() => setIsMobileMenuOpen(false)}
         />
@@ -179,9 +180,8 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
       {/* Mobile Drawer */}
       <div
         ref={mobileDrawerRef}
-        className={`lg:hidden fixed top-0 left-0 z-50 h-full w-80 bg-slate-900 border-r border-slate-700/50 transform transition-transform duration-300 ease-in-out ${
-          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`lg:hidden fixed top-0 left-0 z-50 h-full w-80 bg-slate-900 border-r border-slate-700/50 transform transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="flex flex-col h-full">
           {/* Mobile Header */}
@@ -193,7 +193,7 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
               onClick={() => setIsMobileMenuOpen(false)}
               className="p-2 rounded-lg hover:bg-slate-700/50 transition-colors"
             >
-              <X size={24} />
+              <Icon icon={X} />
             </button>
           </div>
 
@@ -210,18 +210,18 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
               <NetworkSelector />
               <NetworkFeeIndicator />
             </div>
-            
+
             <button
               onClick={() => setIsFiatModalOpen(true)}
               className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition"
             >
-              <CreditCard size={18} />
+              <Icon icon={CreditCard} />
               Buy Crypto
             </button>
 
             {address ? (
               <div className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition">
-                <Wallet size={18} />
+                <Icon icon={Wallet} />
                 <span className="text-sm truncate">
                   {`${address.slice(0, 6)}...${address.slice(-4)}`}
                 </span>
@@ -231,9 +231,9 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
                   title="Copy address"
                 >
                   {copied ? (
-                    <Check size={16} className="text-green-300" />
+                    <Icon icon={Check} dense className="text-green-300" />
                   ) : (
-                    <Copy size={16} className="text-white" />
+                    <Icon icon={Copy} dense className="text-white" />
                   )}
                 </button>
               </div>
@@ -245,7 +245,7 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
                 }}
                 className="flex items-center justify-center gap-2 w-full bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg transition animate-pulse"
               >
-                <Wallet size={18} />
+                <Icon icon={Wallet} />
                 Connect Wallet
               </button>
             )}
@@ -255,9 +255,8 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
 
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex">
-        <div className={`fixed left-0 top-0 h-full bg-slate-900 border-r border-slate-700/50 transition-all duration-300 z-30 ${
-          isCollapsed ? "w-20" : "w-64"
-        }`}>
+        <div className={`fixed left-0 top-0 h-full bg-slate-900 border-r border-slate-700/50 transition-all duration-300 z-30 ${isCollapsed ? "w-20" : "w-64"
+          }`}>
           <div className="flex flex-col h-full">
             {/* Desktop Header */}
             <div className="flex items-center justify-between p-6 border-b border-slate-700/50">
@@ -271,7 +270,7 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
                 className="p-2 rounded-lg hover:bg-slate-700/50 transition-colors"
                 title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
               >
-                {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+                {isCollapsed ? <Icon icon={ChevronRight} /> : <Icon icon={ChevronLeft} />}
               </button>
             </div>
 
@@ -290,22 +289,25 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
                     <NetworkSelector />
                     <NetworkFeeIndicator />
                   </div>
-                  
+
                   <button
                     onClick={() => setIsFiatModalOpen(true)}
                     className="flex items-center justify-center gap-2 w-full bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition"
                   >
-                    <CreditCard size={18} />
+                    <Icon icon={CreditCard} />
                     Buy Crypto
                   </button>
                 </>
               )}
 
               {address ? (
+                <div className={`flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg transition ${isCollapsed ? "justify-center" : ""
+                  }`}>
+                  <Wallet size={18} />
                 <div className={`flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg transition ${
                   isCollapsed ? "justify-center" : ""
                 }`}>
-                  <Wallet size={18} />
+                  <Icon icon={Wallet} />
                   {!isCollapsed && (
                     <>
                       <span className="text-sm truncate">
@@ -317,9 +319,9 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
                         title="Copy address"
                       >
                         {copied ? (
-                          <Check size={16} className="text-green-300" />
+                          <Icon icon={Check} dense className="text-green-300" />
                         ) : (
-                          <Copy size={16} className="text-white" />
+                          <Icon icon={Copy} dense className="text-white" />
                         )}
                       </button>
                     </>
@@ -328,11 +330,10 @@ export default function Sidebar({ address, onConnect }: SidebarProps) {
               ) : (
                 <button
                   onClick={onConnect}
-                  className={`flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg transition animate-pulse ${
-                    isCollapsed ? "justify-center" : ""
-                  }`}
+                  className={`flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg transition animate-pulse ${isCollapsed ? "justify-center" : ""
+                    }`}
                 >
-                  <Wallet size={18} />
+                  <Icon icon={Wallet} />
                   {!isCollapsed && <span>Connect Wallet</span>}
                 </button>
               )}

@@ -2,6 +2,7 @@
 
 import React from "react";
 import { CheckCircle2, X, Twitter } from "lucide-react";
+import Icon from "./ui/Icon";
 
 interface TradeSuccessModalProps {
   isOpen: boolean;
@@ -26,13 +27,13 @@ export default function TradeSuccessModal({ isOpen, onClose, txHash }: TradeSucc
           onClick={onClose}
           className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors"
         >
-          <X size={20} />
+          <Icon icon={X} />
         </button>
 
         {/* Success Icon */}
         <div className="flex justify-center mb-6">
           <div className="bg-green-500/20 p-4 rounded-full">
-            <CheckCircle2 size={48} className="text-green-400" />
+            <Icon icon={CheckCircle2} className="text-green-400" />
           </div>
         </div>
 
@@ -49,7 +50,7 @@ export default function TradeSuccessModal({ isOpen, onClose, txHash }: TradeSucc
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 bg-white text-black font-bold py-3 rounded-xl hover:bg-slate-200 transition-colors"
           >
-            <Twitter size={18} fill="black" />
+            <Icon icon={Twitter} fill="black" />
             Share on X
           </a>
 

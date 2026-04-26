@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { ChevronDown, AlertTriangle } from "lucide-react";
+import Icon from "./ui/Icon";
 
 export type Network = "mainnet" | "testnet";
 
@@ -66,16 +67,13 @@ export default function NetworkSelector({ onNetworkChange }: NetworkSelectorProp
             {selectedNetworkData?.name.replace("Stellar ", "")}
           </span>
         </div>
-        <ChevronDown 
-          size={16} 
-          className={`text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
-        />
+        <Icon icon={ChevronDown} dense className={`text-slate-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
       {/* Testnet Warning Badge */}
       {selectedNetwork === "testnet" && (
         <div className="absolute -top-2 -right-2 bg-yellow-500 text-slate-900 rounded-full px-2 py-1 text-xs font-bold flex items-center gap-1">
-          <AlertTriangle size={10} />
+          <Icon icon={AlertTriangle} dense />
           Testnet
         </div>
       )}

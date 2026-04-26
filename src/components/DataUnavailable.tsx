@@ -3,6 +3,7 @@
 import React from 'react';
 import { Database, RefreshCw, AlertCircle, Wifi, WifiOff } from 'lucide-react';
 import { useBackendHealth } from '../contexts/BackendHealthContext';
+import Icon from './ui/Icon';
 
 interface DataUnavailableProps {
   title?: string;
@@ -24,7 +25,7 @@ export default function DataUnavailable({
   const getDefaultContent = () => {
     if (isOffline) {
       return {
-        icon: <WifiOff size={48} />,
+        icon: <Icon icon={WifiOff} size={48} />,
         title: title || 'Backend Offline',
         message: message || 'Unable to connect to our servers. Please try again later.',
         bgColor: 'bg-red-500/10',
@@ -35,7 +36,7 @@ export default function DataUnavailable({
 
     if (isDegraded) {
       return {
-        icon: <AlertCircle size={48} />,
+        icon: <Icon icon={AlertCircle} size={48} />,
         title: title || 'Data Unavailable',
         message: message || 'Risk data is temporarily unavailable. Blockchain operations remain functional.',
         bgColor: 'bg-yellow-500/10',
@@ -45,7 +46,7 @@ export default function DataUnavailable({
     }
 
     return {
-      icon: <Database size={48} />,
+      icon: <Icon icon={Database} size={48} />,
       title: title || 'Data Unavailable',
       message: message || 'Unable to load data at this time. Please try again.',
       bgColor: 'bg-slate-700/30',
@@ -93,7 +94,7 @@ export default function DataUnavailable({
             onClick={onRetry}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
           >
-            <RefreshCw size={16} />
+            <Icon icon={RefreshCw} dense />
             Retry
           </button>
         )}

@@ -3,6 +3,7 @@
 import React from "react";
 import { Loader2, Wallet, X } from "lucide-react";
 import { useIsSigning, useSigningMessage, useTransactionDetails, useSigningActions } from "../stores/signatureStore";
+import Icon from "./ui/Icon";
 
 export default function SignatureOverlay() {
   const isSigning = useIsSigning();
@@ -22,7 +23,7 @@ export default function SignatureOverlay() {
           className="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors p-1"
           title="Cancel signing"
         >
-          <X size={20} />
+          <Icon icon={X} />
         </button>
 
         <div className="text-center space-y-6">

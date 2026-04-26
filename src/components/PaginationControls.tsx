@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import Icon from './ui/Icon';
 
 interface PaginationInfo {
   currentPage: number;
@@ -84,7 +85,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
           disabled={!hasPreviousPage || isLoading}
           className="flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg border border-slate-600 bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          <ChevronLeft size={16} />
+          <Icon icon={ChevronLeft} dense />
           Previous
         </button>
         
@@ -119,7 +120,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
           className="flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-lg border border-slate-600 bg-slate-700/50 text-slate-300 hover:bg-slate-600/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           Next
-          <ChevronRight size={16} />
+          <Icon icon={ChevronRight} dense />
         </button>
       </div>
     </div>

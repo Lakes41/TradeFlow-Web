@@ -3,6 +3,7 @@
 import React from "react";
 import { FREIGHTER_ID, XBULL_ID, ALBEDO_ID, WalletType } from "../lib/stellar";
 import { getWalletDisplayName, getWalletDescription, getWalletIcon, getWalletBgColor } from "../lib/walletConnector";
+import { CloseIcon } from "./icons";
 
 interface WalletModalProps {
   isOpen: boolean;
@@ -59,19 +60,7 @@ export default function WalletModal({ isOpen, onClose, onConnect }: WalletModalP
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors"
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <CloseIcon />
           </button>
         </div>
 
