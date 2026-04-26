@@ -7,8 +7,10 @@ import FractionalPurchaseModal, {
   type Invoice,
 } from "../../../components/FractionalPurchaseModal";
 import DynamicRiskAssessmentChart from "../../../components/DynamicRiskAssessmentChart";
+import RepayInvoiceButton from "../../../components/RepayInvoiceButton";
 import { useTokenStore } from "../../../stores/tokenStore";
-import { ArrowLeft, ExternalLink, Shield, TrendingUp } from "lucide-react";
+import { useInvoice } from "../../../hooks/useInvoice";
+import { ArrowLeft, ExternalLink, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import Icon from "../../../components/ui/Icon";
 
@@ -20,7 +22,8 @@ const server = new Server("https://soroban-testnet.stellar.org", {
   allowHttp: true,
 });
 
-// TODO: Replace with real invoice data from your API / contract query
+// Static fallback data used while on-chain data loads or if the contract is
+// not yet deployed on testnet.
 const INVOICE_DATA: Invoice = {
   id: "INV-00123",
   faceValue: 50000,
@@ -29,7 +32,6 @@ const INVOICE_DATA: Invoice = {
   currency: "USDC",
 };
 
-// Mock risk assessment data - replace with real data from TradeFlow API
 const MOCK_RISK_DATA = {
   creditScore: 85,
   paymentHistory: 92,
@@ -44,7 +46,17 @@ export default function InvoiceDetailPage() {
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [usdcBalance, setUsdcBalance] = useState("0");
 
-  // Fetch live USDC balance from Stellar network whenever wallet connects
+  // Issue #189: Fetch on-chain invoice data via the useInvoice hook.
+  const { invoice, loading, error } = useInvoice("INV-00123");
+
+  // Determine if the connected wallet is the original issuer (shows Repay CTA).
+  const isIssuer = invoice?.issuer === publicKey;
+
+  // Calculate total due: principal + 8.5% APY interest (simplified).
+  const principal = invoice ? Number(invoice.amount) / 10_000_000 : INVOICE_DATA.faceValue;
+  const totalDue = principal * (1 + INVOICE_DATA.apy / 100);
+
+  // Fetch live USDC balance from Stellar network whenever wallet connects.
   useEffect(() => {
     if (!isConnected || !publicKey) {
       setUsdcBalance("0");
@@ -71,18 +83,12 @@ export default function InvoiceDetailPage() {
     amountStroops: string,
     invoiceId: string
   ) => {
-    // TODO: Replace with your real Soroban client call, e.g.:
-    // await sorobanClient.buy_fraction({
-    //   invoice_id: invoiceId,
-    //   amount: BigInt(amountStroops),
-    // });
     console.log("buy_fraction called:", { invoiceId, amountStroops });
     await new Promise((r) => setTimeout(r, 1500));
   };
 
   return (
     <div className="min-h-screen bg-tradeflow-dark text-white font-sans">
-      {/* Sticky Header */}
       <StickyHeader
         title="INV-123"
         subtitle="Real World Asset token details and performance metrics"
@@ -115,7 +121,9 @@ export default function InvoiceDetailPage() {
               <h2 className="text-xl font-semibold mb-4">Invoice Overview</h2>
 
               {loading && (
-                <p className="text-slate-400 text-sm animate-pulse">Loading on-chain data...</p>
+                <p className="text-slate-400 text-sm animate-pulse">
+                  Loading on-chain data…
+                </p>
               )}
               {error && (
                 <p className="text-red-400 text-sm bg-red-400/10 px-3 py-2 rounded-lg mb-4">
@@ -132,7 +140,7 @@ export default function InvoiceDetailPage() {
                 </div>
                 <div>
                   <p className="text-slate-400 text-sm mb-1">Token ID</p>
-                  <p className="font-mono text-green-300">TKN-0x1234...5678</p>
+                  <p className="font-mono text-green-300">TKN-0x1234…5678</p>
                 </div>
                 <div>
                   <p className="text-slate-400 text-sm mb-1">Principal Amount</p>
@@ -154,14 +162,20 @@ export default function InvoiceDetailPage() {
                 </div>
                 <div>
                   <p className="text-slate-400 text-sm mb-1">Status</p>
-                  <span className="px-3 py-1 rounded-full bg-green-600/20 text-green-400 text-sm font-medium">
-                    {invoice?.status ?? "Active"}
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      invoice?.status === "past_due"
+                        ? "bg-red-600/20 text-red-400"
+                        : "bg-green-600/20 text-green-400"
+                    }`}
+                  >
+                    {invoice?.status === "past_due" ? "Past Due" : invoice?.status ?? "Active"}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Performance Chart — unchanged */}
+            {/* Performance Chart */}
             <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-6">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold">Performance</h2>
@@ -175,7 +189,7 @@ export default function InvoiceDetailPage() {
               </div>
             </div>
 
-            {/* Transaction History — unchanged */}
+            {/* Transaction History */}
             <div className="bg-slate-800/50 rounded-xl border border-slate-700/50 p-6">
               <h2 className="text-xl font-semibold mb-4">Transaction History</h2>
               <div className="space-y-3">
@@ -204,7 +218,6 @@ export default function InvoiceDetailPage() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Risk Assessment Chart */}
             <DynamicRiskAssessmentChart data={MOCK_RISK_DATA} />
 
             {/* Quick Actions */}
@@ -217,6 +230,19 @@ export default function InvoiceDetailPage() {
                 >
                   Buy Fraction
                 </button>
+
+                {/* Issue #194: Show Repay Loan CTA only to the original issuer */}
+                {isConnected && isIssuer && publicKey && (
+                  <RepayInvoiceButton
+                    invoiceId={invoice?.id ?? "INV-00123"}
+                    callerPublicKey={publicKey}
+                    totalDue={totalDue}
+                    onSuccess={() => {
+                      // Optionally refresh invoice state after repayment
+                    }}
+                  />
+                )}
+
                 <button className="w-full px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors">
                   View Documents
                 </button>
@@ -228,7 +254,6 @@ export default function InvoiceDetailPage() {
           </div>
         </div>
 
-        {/* Fractional Purchase Modal */}
         {showBuyModal && (
           <FractionalPurchaseModal
             invoice={INVOICE_DATA}

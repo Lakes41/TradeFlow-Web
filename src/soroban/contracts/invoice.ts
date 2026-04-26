@@ -25,6 +25,29 @@ export interface MintInvoiceParams {
   callerPublicKey: string;
 }
 
+export interface RepayInvoiceParams {
+  invoiceId: string;
+  callerPublicKey: string;
+}
+
+/**
+ * Parses a Soroban simulation error into a human-readable message.
+ * Handles out-of-gas, resource limit, and contract assertion errors.
+ */
+function parseSimulationError(error: unknown): string {
+  const msg = String(error);
+  if (msg.includes("ExceededLimit") || msg.includes("resource")) {
+    return "Transaction exceeds Soroban resource limits. Try reducing the operation size.";
+  }
+  if (msg.includes("InsufficientFee") || msg.includes("fee")) {
+    return "Insufficient fee for this transaction. The network requires a higher fee.";
+  }
+  if (msg.includes("ContractError") || msg.includes("assert")) {
+    return `Contract assertion failed: ${msg}`;
+  }
+  return `Simulation failed: ${msg}`;
+}
+
 export async function getInvoice(invoiceId: string): Promise<Invoice> {
   const client = getSorobanClient();
   const { contractIds, networkPassphrase } = getSorobanConfig();
@@ -43,7 +66,7 @@ export async function getInvoice(invoiceId: string): Promise<Invoice> {
   );
 
   if ("error" in result) {
-    throw new Error(`get_invoice simulation failed: ${(result as any).error}`);
+    throw new Error(parseSimulationError((result as any).error));
   }
 
   const returnVal = (result as any).result?.retval;
@@ -75,6 +98,7 @@ export async function mintInvoice(params: MintInvoiceParams): Promise<string> {
     nativeToScVal(recipient, { type: "address" }),
   ];
 
+  // Build with a conservative base fee; simulation will provide the real fee.
   const tx = new TransactionBuilder(account, {
     fee: "1000",
     networkPassphrase,
@@ -83,9 +107,57 @@ export async function mintInvoice(params: MintInvoiceParams): Promise<string> {
     .setTimeout(60)
     .build();
 
+  // --- Issue #190: Simulate first and extract the required fee ---
   const simResult = await client.simulateTransaction(tx);
   if ("error" in simResult) {
-    throw new Error(`mint_invoice simulation failed: ${(simResult as any).error}`);
+    // Surface a clear, actionable error before ever prompting the wallet.
+    throw new Error(parseSimulationError((simResult as any).error));
+  }
+
+  // prepareTransaction injects the fee and resource config from simulation.
+  const preparedTx = await client.prepareTransaction(tx, networkPassphrase);
+  const xdr = preparedTx.toXDR();
+
+  // --- Issue #189: Trigger Freighter signing prompt ---
+  const signedXdr = await signTransaction(xdr, {
+    address: callerPublicKey,
+    networkPassphrase,
+  });
+
+  const { hash } = await client.sendTransaction(
+    TransactionBuilder.fromXDR(signedXdr, networkPassphrase)
+  );
+
+  // Poll until the transaction is included in a ledger.
+  return await waitForTransaction(hash);
+}
+
+/**
+ * Issue #194: Repay a mature invoice loan.
+ * Calls the `repay` function on the Soroban contract.
+ */
+export async function repayInvoice(params: RepayInvoiceParams): Promise<string> {
+  const { invoiceId, callerPublicKey } = params;
+  const client = getSorobanClient();
+  const { contractIds, networkPassphrase } = getSorobanConfig();
+  const contract = new Contract(contractIds.invoice);
+
+  const account = await client.getAccount(callerPublicKey);
+
+  const args = [nativeToScVal(invoiceId, { type: "string" })];
+
+  const tx = new TransactionBuilder(account, {
+    fee: "1000",
+    networkPassphrase,
+  })
+    .addOperation(contract.call("repay", ...args))
+    .setTimeout(60)
+    .build();
+
+  // Simulate first to catch resource/fee errors before prompting the wallet.
+  const simResult = await client.simulateTransaction(tx);
+  if ("error" in simResult) {
+    throw new Error(parseSimulationError((simResult as any).error));
   }
 
   const preparedTx = await client.prepareTransaction(tx, networkPassphrase);
