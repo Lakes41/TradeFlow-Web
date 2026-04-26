@@ -6,6 +6,7 @@ import { useDebounce } from "../hooks/useDebounce";
 import { useRecentTokens } from "../hooks/useRecentTokens";
 import { useWatchlist } from "../hooks/useWatchlist";
 import StarIcon from "./StarIcon";
+import { showError, showSuccess } from "../lib/toast";
 import toast from "react-hot-toast";
 import Icon from "./ui/Icon";
 
@@ -81,13 +82,13 @@ export default function TokenDropdown({ onTokenChange }: TokenDropdownProps) {
   const handleCopyAddress = (e: React.MouseEvent, token: string) => {
     e.stopPropagation();
     const address = mockAddresses[token] || "Address not found";
-    
+
     navigator.clipboard.writeText(address)
       .then(() => {
-        toast.success("Token Address Copied!");
+        showSuccess("Token Address Copied!");
       })
       .catch(() => {
-        toast.error("Failed to copy address");
+        showError("Failed to copy address");
       });
   };
 
@@ -173,11 +174,10 @@ export default function TokenDropdown({ onTokenChange }: TokenDropdownProps) {
                 <button
                   key={token}
                   onClick={() => handleTokenSelect(token)}
-                  className={`w-full text-left px-4 py-2 transition-colors flex items-center justify-between group ${
-                    token === selectedToken
+                  className={`w-full text-left px-4 py-2 transition-colors flex items-center justify-between group ${token === selectedToken
                       ? "bg-blue-600/20 text-blue-400"
                       : "hover:bg-slate-700 text-white"
-                  }`}
+                    }`}
                 >
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{token}</span>

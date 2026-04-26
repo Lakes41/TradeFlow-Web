@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Wallet, Copy, Check, CreditCard } from "lucide-react";
-import toast from "react-hot-toast";
+import { showError, showSuccess } from "../lib/toast";
 
 // Corrected imports based on your actual file structure
 import NetworkSelector from "./NetworkSelector";
@@ -29,10 +29,10 @@ export default function Navbar({ address, onConnect }: NavbarProps) {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
 
-        toast.success("Address copied to clipboard!");
+        showSuccess("Address copied to clipboard!");
       } catch (err) {
         console.error('Failed to copy address:', err);
-        toast.error("Failed to copy address");
+        showError("Failed to copy address");
       }
     }
   };
@@ -59,11 +59,10 @@ export default function Navbar({ address, onConnect }: NavbarProps) {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm font-medium transition-colors ${
-                  isActive
+                className={`text-sm font-medium transition-colors ${isActive
                     ? "text-cyan-400"
                     : "text-slate-400 hover:text-white"
-                }`}
+                  }`}
               >
                 {link.name}
               </Link>
