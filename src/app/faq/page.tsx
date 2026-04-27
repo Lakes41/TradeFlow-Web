@@ -1,6 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { Home } from "lucide-react";
+import Icon from "../../components/ui/Icon";
 
 export default function FAQ() {
   return (
@@ -11,7 +12,7 @@ export default function FAQ() {
           href="/"
           className="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-8"
         >
-          <Home size={20} />
+          <Icon icon={Home} />
           Back to Dashboard
         </Link>
         

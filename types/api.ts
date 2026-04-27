@@ -110,6 +110,8 @@ export interface InvoiceSummary {
   riskScore: number;
   status: string;
   amount: number | string;
+  apy?: number;
+  riskTier?: 'A' | 'B' | 'C' | 'D';
   [key: string]: unknown;
 }
 

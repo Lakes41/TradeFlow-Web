@@ -3,6 +3,7 @@
 import React from "react";
 import { AlertCircle, X } from "lucide-react";
 import Card from "./Card";
+import Icon from "./ui/Icon";
 
 interface ExpertModeModalProps {
   isOpen: boolean;
@@ -23,7 +24,7 @@ export default function ExpertModeModal({
         <div className="flex justify-between items-start mb-6">
           <div className="flex items-center gap-3 text-orange-500">
             <div className="p-2 bg-orange-500/10 rounded-lg">
-              <AlertCircle size={24} />
+              <Icon icon={AlertCircle} />
             </div>
             <h2 className="text-xl font-bold text-white">Expert Mode</h2>
           </div>
@@ -31,7 +32,7 @@ export default function ExpertModeModal({
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors"
           >
-            <X size={20} />
+            <Icon icon={X} />
           </button>
         </div>
 

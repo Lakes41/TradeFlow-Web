@@ -15,3 +15,15 @@ The frontend interface for the TradeFlow protocol, enabling decentralized invoic
 ## 🚦 Status
 - **Development**: Active
 - **CI/CD**: Passing
+
+
+
+<!-- git add .
+git commit -m "feat: connect Soroban contract bindings to Next.js frontend (#187)
+
+- Add lib/soroban with config, client, and invoice contract wrappers
+- Add useInvoice and useMintInvoice hooks
+- Wire hooks into InvoiceMintForm and marketplace/inv-123 page
+- Pull contract ID and network passphrase from env vars"
+
+git push origin Soroban -->

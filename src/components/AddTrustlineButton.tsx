@@ -1,10 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { toast } from "react-hot-toast";
 import { Plus, Check, Loader2 } from "lucide-react";
 import { addTrustline } from "../lib/stellar";
+import { dismissToast, showError, showLoading, showSuccess } from "../lib/toast";
 import Button from "./ui/Button";
+import Icon from "./ui/Icon";
 
 interface AddTrustlineButtonProps {
   assetCode: string;
@@ -22,30 +23,29 @@ export default function AddTrustlineButton({ assetCode, assetIssuer }: AddTrustl
     if (status === "loading" || status === "success") return;
 
     setStatus("loading");
-    const toastId = toast.loading(`Requesting ${assetCode} trustline...`);
+    const toastId = showLoading(`Requesting ${assetCode} trustline...`);
 
     try {
       await addTrustline(assetCode, assetIssuer);
-      
+
       setStatus("success");
-      toast.success(`${assetCode} Trustline Established!`, { 
-        id: toastId,
-        icon: '✅'
-      });
-      
+      dismissToast(toastId);
+      showSuccess(`${assetCode} Trustline Established!`);
+
       // Revert to idle after 5 seconds
       setTimeout(() => setStatus("idle"), 5000);
     } catch (error: any) {
       console.error(`[AddTrustline] Error:`, error);
       setStatus("error");
-      
+
       // Handle rejection vs generic error
-      const errorMsg = error.message?.includes("denied") 
-        ? "Access Denied by User" 
+      const errorMsg = error.message?.includes("denied")
+        ? "Access Denied by User"
         : `Failed to add ${assetCode}`;
-        
-      toast.error(errorMsg, { id: toastId });
-      
+
+      dismissToast(toastId);
+      showError(errorMsg);
+
       // Revert to idle after 3 seconds to allow retry
       setTimeout(() => setStatus("idle"), 3000);
     }
@@ -56,18 +56,17 @@ export default function AddTrustlineButton({ assetCode, assetIssuer }: AddTrustl
       variant="secondary"
       onClick={handleAddTrustline}
       disabled={status === "loading" || status === "success"}
-      className={`flex items-center gap-2 text-xs py-1.5 px-3 h-auto transition-all duration-200 ${
-        status === "success" ? "bg-green-600/20 text-green-400 border-green-600/50" : ""
-      }`}
+      className={`flex items-center gap-2 text-xs py-1.5 px-3 h-auto transition-all duration-200 ${status === "success" ? "bg-green-600/20 text-green-400 border-green-600/50" : ""
+        }`}
     >
       {status === "loading" ? (
-        <Loader2 size={14} className="animate-spin" />
+        <Icon icon={Loader2} dense className="animate-spin" />
       ) : status === "success" ? (
-        <Check size={14} />
+        <Icon icon={Check} dense />
       ) : (
-        <Plus size={14} />
+        <Icon icon={Plus} dense />
       )}
-      
+
       <span>
         {status === "loading" ? "Signing..." : status === "success" ? "Trustline Active" : `Add ${assetCode}`}
       </span>

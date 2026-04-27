@@ -1,13 +1,14 @@
 import React from 'react';
 import Link from 'next/link';
 import { FileText } from 'lucide-react';
+import Icon from './ui/Icon';
 
 export default function HistoryEmptyState() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
       {/* Ghost/Document Icon */}
       <div className="mb-8 p-6 bg-slate-700/30 rounded-full border-2 border-slate-600/50">
-        <FileText size={64} className="text-slate-400" />
+        <Icon icon={FileText} size={64} className="text-slate-400" />
       </div>
 
       {/* Main Text */}
@@ -24,7 +25,7 @@ export default function HistoryEmptyState() {
         href="/swap"
         className="flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white font-medium px-8 py-4 rounded-full transition-all transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-slate-900"
       >
-        <FileText size={20} />
+        <Icon icon={FileText} />
         Make a Trade
       </Link>
     </div>

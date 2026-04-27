@@ -2,6 +2,8 @@
 
 import React from "react";
 import { FREIGHTER_ID, XBULL_ID, ALBEDO_ID, WalletType } from "../lib/stellar";
+import { getWalletDisplayName, getWalletDescription, getWalletIcon, getWalletBgColor } from "../lib/walletConnector";
+import { CloseIcon } from "./icons";
 
 interface WalletModalProps {
   isOpen: boolean;
@@ -20,24 +22,24 @@ interface WalletOption {
 const walletOptions: WalletOption[] = [
   {
     id: FREIGHTER_ID,
-    name: "Freighter",
-    description: "Popular browser extension wallet",
-    icon: "M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5z",
-    bgColor: "bg-blue-500"
+    name: getWalletDisplayName(FREIGHTER_ID),
+    description: getWalletDescription(FREIGHTER_ID),
+    icon: getWalletIcon(FREIGHTER_ID),
+    bgColor: getWalletBgColor(FREIGHTER_ID)
   },
   {
     id: XBULL_ID,
-    name: "xBull",
-    description: "Mobile-first Stellar wallet",
-    icon: "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z",
-    bgColor: "bg-orange-500"
+    name: getWalletDisplayName(XBULL_ID),
+    description: getWalletDescription(XBULL_ID),
+    icon: getWalletIcon(XBULL_ID),
+    bgColor: getWalletBgColor(XBULL_ID)
   },
   {
     id: ALBEDO_ID,
-    name: "Albedo",
-    description: "Web-based Stellar wallet",
-    icon: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
-    bgColor: "bg-purple-500"
+    name: getWalletDisplayName(ALBEDO_ID),
+    description: getWalletDescription(ALBEDO_ID),
+    icon: getWalletIcon(ALBEDO_ID),
+    bgColor: getWalletBgColor(ALBEDO_ID)
   }
 ];
 
@@ -58,19 +60,7 @@ export default function WalletModal({ isOpen, onClose, onConnect }: WalletModalP
             onClick={onClose}
             className="text-slate-400 hover:text-white transition-colors"
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <CloseIcon />
           </button>
         </div>
 

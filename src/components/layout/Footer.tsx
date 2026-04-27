@@ -2,6 +2,8 @@
 
 import React from "react";
 import { ExternalLink } from "lucide-react";
+import NetworkToggle from "../NetworkToggle";
+import Icon from "../ui/Icon";
 
 export default function Footer() {
   const handleClearCache = () => {
@@ -17,9 +19,10 @@ export default function Footer() {
 
           <div className="flex items-center gap-4">
             <span className="text-slate-400 text-sm">
-              © 2024 TradeFlow. All rights reserved.
+              2024 TradeFlow. All rights reserved.
             </span>
-            {/* Developer QA Utility */}
+            {/* Developer QA Utilities */}
+            <NetworkToggle />
             <button
               onClick={handleClearCache}
               className="text-slate-600 hover:text-slate-400 transition-colors text-xs"
@@ -59,7 +62,7 @@ export default function Footer() {
               className="flex items-center gap-1 text-slate-400 hover:text-white transition-colors text-sm"
             >
               Twitter
-              <ExternalLink size={12} className="w-4 h-4" />
+              <Icon icon={ExternalLink} dense className="w-4 h-4" />
             </a>
           </nav>
 

@@ -1,40 +1,25 @@
-import "./globals.css";
-import React from "react";
-import { Inter } from "next/font/google";
-import { Toaster } from "sonner";
-import ToasterProvider from "../components/general/ToasterProvider";
-import { SlippageProvider } from "../contexts/SlippageContext";
-import { NetworkCongestionProvider } from "../contexts/NetworkCongestionContext";
-import Footer from "../components/layout/Footer";
-import NetworkCongestionBanner from "../components/NetworkCongestionBanner";
-import ErrorBoundary from "../components/ErrorBoundary";
+import type { Config } from "tailwindcss";
 
-const inter = Inter({
-subsets: ["latin"],
-variable: "--font-inter",
-});
-
-export const metadata = {
-title: "TradeFlow",
-description: "TradeFlow RWA Dashboard",
+const config: Config = {
+  content: [
+    "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        "tradeflow-dark": "#0a0a0f",
+        "tradeflow-secondary": "#12121a",
+        "tradeflow-muted": "#2a2a3a",
+        "tradeflow-accent": "#3b82f6",
+      },
+      fontFamily: {
+        sans: ["var(--font-inter)", "sans-serif"],
+      },
+    },
+  },
+  plugins: [require("tailwind-scrollbar")],
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <body className={`${inter.variable} font-sans antialiased scrollbar-thin scrollbar-track-transparent scrollbar-thumb-tradeflow-muted hover:scrollbar-thumb-tradeflow-accent`}>
-        <ErrorBoundary>
-          <NetworkCongestionProvider>
-            <SlippageProvider>
-              <ToasterProvider />
-              {/* <Toaster position="top-right" richColors closeButton /> */}
-              <NetworkCongestionBanner />
-              {children}
-              <Footer />
-            </SlippageProvider>
-          </NetworkCongestionProvider>
-        </ErrorBoundary>
-      </body>
-    </html>
-  );
-}
+export default config;

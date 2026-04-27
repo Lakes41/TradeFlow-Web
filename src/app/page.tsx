@@ -1,15 +1,19 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { connectWallet, WalletType } from "../lib/stellar";
-import { PlusCircle, ShieldCheck, Landmark, Star } from "lucide-react";
+import { PlusCircle, ShieldCheck, Landmark, Star, Wallet } from "lucide-react";
 import LoanTable from "../components/LoanTable";
 import SkeletonRow from "../components/SkeletonRow";
 import Navbar from "../components/Navbar";
 import StickyHeader from "../components/StickyHeader";
 import Card from "../components/Card";
-import WalletModal from "../components/WalletModal";
+import FreighterConnectModal from "../components/FreighterConnectModal";
 import InvoiceMintForm from "../components/InvoiceMintForm";
+import InvoiceTable from "../components/InvoiceTable";
+import InvoiceFilter, { InvoiceFilters } from "../components/InvoiceFilter";
+import RWALoansDashboard from "../components/RWALoansDashboard";
 import NewsBanner from "../components/NewsBanner";
 import useTransactionToast from "../lib/useTransactionToast";
 import AddTrustlineButton from "../components/AddTrustlineButton";
@@ -21,9 +25,14 @@ import StarIcon from "../components/StarIcon";
 import { api } from "../lib/api";
 import type { InvoiceSummary } from "../../types/api";
 import { RiskSocketClient } from "../lib/riskSocket";
+import { useWalletConnection } from "../stores/useWeb3Store";
+import { showError, showSuccess } from "../lib/toast";
+import Icon from "../components/ui/Icon";
 
 export default function Page() {
-  const [address, setAddress] = useState("");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { isConnected, walletAddress, isConnecting } = useWalletConnection();
   const [invoices, setInvoices] = useState<InvoiceSummary[]>([]);
   const [loading, setLoading] = useState(false);
   const [showMintForm, setShowMintForm] = useState(false);
@@ -32,6 +41,26 @@ export default function Page() {
   const { toggleWatchlist, isInWatchlist } = useWatchlist();
   const riskSocketRef = useRef<RiskSocketClient | null>(null);
 
+  // Initialize filters from URL params
+  const [filters, setFilters] = useState<InvoiceFilters>(() => ({
+    minApy: parseFloat(searchParams.get('minApy') || '0'),
+    maxApy: parseFloat(searchParams.get('maxApy') || '25'),
+    tiers: searchParams.get('tiers')?.split(',').filter(Boolean) || [],
+  }));
+
+  // Update URL when filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (filters.minApy > 0) params.set('minApy', filters.minApy.toString());
+    if (filters.maxApy < 25) params.set('maxApy', filters.maxApy.toString());
+    if (filters.tiers.length > 0) params.set('tiers', filters.tiers.join(','));
+    
+    const queryString = params.toString();
+    const newUrl = queryString ? `/?${queryString}` : '/';
+    router.replace(newUrl);
+  }, [filters, router]);
+
+  
   // 1. Connect Stellar Wallet (supports Freighter, Albedo, xBull)
   const handleConnectWallet = async (walletType: WalletType) => {
     try {
@@ -39,11 +68,12 @@ export default function Page() {
       if (userInfo && userInfo.publicKey) {
         setAddress(userInfo.publicKey);
         console.log("Wallet connected:", userInfo.publicKey, "Type:", userInfo.walletType);
+        showSuccess("Wallet connected");
       }
     } catch (e: unknown) {
       const error = e as Error;
       console.error("Connection failed:", error.message);
-      alert(error.message || "Failed to connect to wallet.");
+      showError(error.message || "Failed to connect to wallet.");
     }
   };
 
@@ -72,7 +102,7 @@ export default function Page() {
   }, []);
 
   useEffect(() => {
-    if (!address) {
+    if (!walletAddress) {
       riskSocketRef.current?.disconnect();
       riskSocketRef.current = null;
       return;
@@ -98,14 +128,14 @@ export default function Page() {
         riskSocketRef.current = null;
       }
     };
-  }, [address]);
+  }, [walletAddress]);
 
   useEffect(() => {
-    if (!address) return;
+    if (!walletAddress) return;
     if (invoices.length === 0) return;
 
     riskSocketRef.current?.syncInvoices(invoices.map((i) => i.id));
-  }, [address, invoices]);
+  }, [walletAddress, invoices]);
   const toast = useTransactionToast();
 
   const handleTestToast = () => {
@@ -122,16 +152,44 @@ export default function Page() {
 
   const tabs = [
     { id: "dashboard", label: "Dashboard" },
-    { id: "watchlist", label: "Watchlist", icon: <Star size={16} /> },
+    { id: "watchlist", label: "Watchlist", icon: <Icon icon={Star} dense /> },
   ];
 
   return (
-    <div className="min-h-screen bg-tradeflow-dark text-white font-sans">
-      {/* Sticky Header */}
-      <StickyHeader
-        title="Marketplace"
-        subtitle="Trade and manage Real World Asset tokens"
-      />
+    <div className="min-h-screen bg-slate-900 text-white font-sans flex flex-col">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-12 p-8 border-b border-slate-800/50">
+        <div className="flex items-center gap-12">
+          <h1 className="text-3xl font-bold tracking-tight">
+            TradeFlow <span className="text-blue-400">RWA</span>
+          </h1>
+          <nav className="hidden md:flex items-center gap-8">
+            <a href="/" className="text-white font-medium hover:text-blue-400 transition-colors">Dashboard</a>
+            <a href="/swap" className="text-slate-400 font-medium hover:text-white transition-colors">Swap</a>
+            <a href="/pools" className="text-slate-400 font-medium hover:text-white transition-colors">Pools</a>
+          </nav>
+        </div>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setIsModalOpen(true)}
+            disabled={isConnecting}
+            className={`flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:opacity-50 px-6 py-2 rounded-full transition shadow-lg shadow-blue-900/20 ${!walletAddress && !isConnecting ? 'animate-pulse' : ''}`}
+          >
+            <Wallet size={18} />
+            {isConnecting ? (
+              "Connecting..."
+            ) : walletAddress ? (
+              `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`
+            ) : (
+              "Connect Wallet"
+            )}
+            <Icon icon={Wallet} dense />
+            {address
+              ? `${address.slice(0, 6)}...${address.slice(-4)}`
+              : "Connect Wallet"}
+          </button>
+        </div>
+      </div>
 
       {/* Main Content */}
       <div className="px-4 lg:px-8 py-6">
@@ -142,20 +200,11 @@ export default function Page() {
           onTabChange={setActiveTab}
         />
 
-        {/* Main Content */}
-        <div className="flex-1 px-4 lg:px-8">
-          {/* Tab Navigation */}
-          <TabNavigation
-            tabs={tabs}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-          />
-
-          {/* Tab Content */}
-          {activeTab === "watchlist" ? (
-            <WatchlistTab />
-          ) : (
-            <>
+        {/* Tab Content */}
+        {activeTab === "watchlist" ? (
+          <WatchlistTab />
+        ) : (
+          <>
               {/* Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
                 <Card>
@@ -172,7 +221,7 @@ export default function Page() {
                   onClick={() => setShowMintForm(true)}
                   className="bg-tradeflow-accent/10 border-2 border-dashed border-tradeflow-accent/50 p-6 rounded-2xl flex flex-col items-center justify-center hover:bg-tradeflow-accent/20 transition"
                 >
-                  <PlusCircle className="text-tradeflow-accent mb-2" size={32} />
+                  <Icon icon={PlusCircle} className="text-tradeflow-accent mb-2" size={32} />
                   <span className="font-medium text-tradeflow-accent">
                     Mint New Invoice NFT
                   </span>
@@ -192,7 +241,6 @@ export default function Page() {
                       <StarIcon
                         isStarred={isInWatchlist("USDC")}
                         onClick={() => toggleWatchlist("USDC")}
-                        size={14}
                       />
                     </div>
                     <AddTrustlineButton
@@ -206,7 +254,6 @@ export default function Page() {
                       <StarIcon
                         isStarred={isInWatchlist("yXLM")}
                         onClick={() => toggleWatchlist("yXLM")}
-                        size={14}
                       />
                     </div>
                     <AddTrustlineButton
@@ -218,6 +265,7 @@ export default function Page() {
               </div>
 
               {/* Invoice Table */}
+              <InvoiceTable />
               <div className="bg-tradeflow-secondary rounded-2xl border border-tradeflow-muted overflow-hidden mb-12">
                 <div className="p-6 border-b border-slate-700">
                   <h2 className="text-xl font-semibold">Verified Asset Pipeline</h2>
@@ -238,7 +286,7 @@ export default function Page() {
                         <SkeletonRow key={`skeleton-${index}`} />
                       ))
                     ) : (
-                      invoices.map((inv: { id: string; riskScore: number; status: string; amount: number | string }) => (
+                      invoices.map((inv) => (
                         <tr
                           key={inv.id}
                           className="border-b border-tradeflow-muted/50 hover:bg-tradeflow-muted/20 transition"
@@ -267,24 +315,37 @@ export default function Page() {
                     )}
                   </tbody>
                 </table>
+              {/* Invoice Table with Filters */}
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-12">
+                {/* Filter Sidebar */}
+                <div className="lg:col-span-1">
+                  <InvoiceFilter
+                    filters={filters}
+                    onFiltersChange={setFilters}
+                  />
+                </div>
+
+                {/* Invoice Table */}
+                <div className="lg:col-span-3">
+                  <InvoiceTable filters={filters} />
+                </div>
               </div>
 
-              {/* Active Loans Table (Issue #6) */}
-              <div className="bg-tradeflow-secondary rounded-2xl border border-tradeflow-muted overflow-hidden">
-                <div className="p-6 border-b border-slate-700">
-                  <h2 className="text-xl font-semibold">Active Loans Dashboard</h2>
-                </div>
-                <div className="p-6 bg-tradeflow-dark/50">
-                  <LoanTable />
-                </div>
-              </div>
+              {/* RWA Loans Dashboard */}
+              <RWALoansDashboard />
 
               {/* Pro Mode Charts (Lazy-loaded) */}
               <ProModeSection />
-            </>
-          )}
+          </>
+        )}
         </div>
 
+        {/* Modals */}
+        <FreighterConnectModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+        />
+        
         <WalletModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
