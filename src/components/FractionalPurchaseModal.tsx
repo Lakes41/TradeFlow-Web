@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import BigNumber from "bignumber.js";
 import { X, Wallet, TrendingUp, Zap } from "lucide-react";
 import Button from "./ui/Button";
-import Icon from "./ui/Icon";
+import { useTxWithToast } from "../hooks/useTxWithToast";
 
 BigNumber.config({ EXPONENTIAL_AT: 1e9, DECIMAL_PLACES: 7 });
 
@@ -57,45 +57,56 @@ export default function FractionalPurchaseModal({
 }: FractionalPurchaseModalProps) {
   const [amount, setAmount] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  const { executeTx } = useTxWithToast();
 
   const days = daysToMaturity(invoice.dueDate);
   const balance = new BigNumber(walletBalance || "0");
   const entered = new BigNumber(amount || "0");
-  const isValid = entered.isGreaterThan(0) && entered.isLessThanOrEqualTo(balance);
+  const isValid =
+    entered.isGreaterThan(0) && entered.isLessThanOrEqualTo(balance);
   const { yieldAmt, total } = calcExpectedReturn(amount, invoice.apy, days);
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     if (/^\d*\.?\d{0,7}$/.test(val) || val === "") {
       setAmount(val);
-      setError(null);
+      setValidationError(null);
     }
   };
 
   const handleMax = () => {
     setAmount(balance.toFixed(7));
-    setError(null);
+    setValidationError(null);
   };
 
   const handleSubmit = async () => {
+    // Validation errors stay inline — these are user input issues, not tx errors
     if (!isValid) {
-      setError(
+      setValidationError(
         entered.isGreaterThan(balance)
           ? "Amount exceeds wallet balance."
           : "Enter a valid amount greater than 0."
       );
       return;
     }
+
     setIsSubmitting(true);
-    setError(null);
-    try {
-      await onBuyFraction(toStroops(amount), invoice.id);
+    setValidationError(null);
+
+    // executeTx wraps the call in try/catch and fires the correct toast:
+    //   - "User Rejected Signature" → warning toast
+    //   - Network / Contract error  → error toast
+    // Returns null if the transaction failed (toast already shown).
+    const result = await executeTx(() =>
+      onBuyFraction(toStroops(amount), invoice.id)
+    );
+
+    setIsSubmitting(false);
+
+    if (result !== null) {
       onClose();
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Transaction failed. Try again.");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -129,7 +140,9 @@ export default function FractionalPurchaseModal({
             </div>
             <div className="bg-slate-700/50 rounded-xl p-3 text-center">
               <p className="text-xs text-slate-400 mb-1">APY</p>
-              <p className="text-emerald-400 font-semibold text-sm">{invoice.apy}%</p>
+              <p className="text-emerald-400 font-semibold text-sm">
+                {invoice.apy}%
+              </p>
             </div>
             <div className="bg-slate-700/50 rounded-xl p-3 text-center">
               <p className="text-xs text-slate-400 mb-1">Days Left</p>
@@ -175,8 +188,8 @@ export default function FractionalPurchaseModal({
                 {invoice.currency}
               </span>
             </div>
-            {error && (
-              <p className="mt-2 text-sm text-red-400">{error}</p>
+            {validationError && (
+              <p className="mt-2 text-sm text-red-400">{validationError}</p>
             )}
             <p className="mt-1.5 text-xs text-slate-500">
               Up to 7 decimal places (Stellar precision)

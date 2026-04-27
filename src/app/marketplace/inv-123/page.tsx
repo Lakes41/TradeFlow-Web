@@ -9,8 +9,8 @@ import FractionalPurchaseModal, {
 import DynamicRiskAssessmentChart from "../../../components/DynamicRiskAssessmentChart";
 import RepayInvoiceButton from "../../../components/RepayInvoiceButton";
 import { useTokenStore } from "../../../stores/tokenStore";
-import { useInvoice } from "../../../hooks/useInvoice";
-import { ArrowLeft, ExternalLink, TrendingUp } from "lucide-react";
+import { useTxWithToast } from "../../../hooks/useTxWithToast";
+import { ArrowLeft, ExternalLink, Shield, TrendingUp } from "lucide-react";
 import Link from "next/link";
 import Icon from "../../../components/ui/Icon";
 
@@ -46,17 +46,9 @@ export default function InvoiceDetailPage() {
   const [showBuyModal, setShowBuyModal] = useState(false);
   const [usdcBalance, setUsdcBalance] = useState("0");
 
-  // Issue #189: Fetch on-chain invoice data via the useInvoice hook.
-  const { invoice, loading, error } = useInvoice("INV-00123");
+  const { executeTx } = useTxWithToast();
 
-  // Determine if the connected wallet is the original issuer (shows Repay CTA).
-  const isIssuer = invoice?.issuer === publicKey;
-
-  // Calculate total due: principal + 8.5% APY interest (simplified).
-  const principal = invoice ? Number(invoice.amount) / 10_000_000 : INVOICE_DATA.faceValue;
-  const totalDue = principal * (1 + INVOICE_DATA.apy / 100);
-
-  // Fetch live USDC balance from Stellar network whenever wallet connects.
+  // Fetch live USDC balance from Stellar network whenever wallet connects
   useEffect(() => {
     if (!isConnected || !publicKey) {
       setUsdcBalance("0");
@@ -65,9 +57,12 @@ export default function InvoiceDetailPage() {
 
     const fetchBalance = async () => {
       try {
-        const accountResponse = await server.accounts().accountId(publicKey).call();
+        const accountResponse = await server
+          .accounts()
+          .accountId(publicKey)
+          .call();
         const usdcEntry = accountResponse.balances.find(
-          (b: any) =>
+          (b: { asset_code?: string; asset_issuer?: string }) =>
             b.asset_code === USDC_CODE && b.asset_issuer === USDC_ISSUER
         );
         setUsdcBalance(usdcEntry ? usdcEntry.balance : "0");
@@ -79,12 +74,21 @@ export default function InvoiceDetailPage() {
     fetchBalance();
   }, [isConnected, publicKey]);
 
+  // Wrapping the Soroban call with executeTx ensures any Freighter error
+  // (user rejection, network failure, contract error) fires the correct toast.
   const handleBuyFraction = async (
     amountStroops: string,
     invoiceId: string
-  ) => {
-    console.log("buy_fraction called:", { invoiceId, amountStroops });
-    await new Promise((r) => setTimeout(r, 1500));
+  ): Promise<void> => {
+    await executeTx(async () => {
+      // TODO: Replace the lines below with your real Soroban client call, e.g.:
+      // await sorobanClient.buy_fraction({
+      //   invoice_id: invoiceId,
+      //   amount: BigInt(amountStroops),
+      // });
+      console.log("buy_fraction called:", { invoiceId, amountStroops });
+      await new Promise((r) => setTimeout(r, 1500));
+    });
   };
 
   return (
