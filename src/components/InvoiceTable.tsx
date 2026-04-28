@@ -61,13 +61,8 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ filters }) => {
   } = useQuery<InvoicesResponse>({
     queryKey: ['invoices', currentPage, itemsPerPage, filters],
     queryFn: async () => {
-      const response = await fetch(`/api/invoices?${queryString}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch invoices');
       try {
-        const response = await fetch(
-          `/api/invoices?page=${currentPage}&limit=${itemsPerPage}`
-        );
+        const response = await fetch(`/api/invoices?${queryString}`);
         if (!response.ok) {
           throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
