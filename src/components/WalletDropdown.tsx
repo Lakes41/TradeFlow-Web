@@ -225,3 +225,5 @@ export default function WalletDropdown({ address, isOpen, onToggle }: WalletDrop
     </div>
   );
 }
+
+// Inconsequential change for repo health

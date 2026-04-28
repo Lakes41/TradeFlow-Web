@@ -83,3 +83,5 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
     </div>
   );
 }
+
+// Inconsequential change for repo health

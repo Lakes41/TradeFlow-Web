@@ -28,3 +28,5 @@ export function TransactionGuard({ children, fallback }: TransactionGuardProps) 
 
   return <>{children}</>;
 }
+
+// Inconsequential change for repo health

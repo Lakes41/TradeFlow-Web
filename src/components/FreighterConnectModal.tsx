@@ -210,3 +210,5 @@ export default function FreighterConnectModal({ isOpen, onClose }: FreighterConn
     </div>
   );
 }
+
+// Inconsequential change for repo health

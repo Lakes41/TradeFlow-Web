@@ -42,3 +42,4 @@ export const ScrollToTop: React.FC = () => {
     </button>
   );
 };
+// Inconsequential change for repo health

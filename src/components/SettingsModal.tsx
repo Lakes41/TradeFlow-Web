@@ -118,3 +118,5 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
     </div>
   );
 }
+
+// Inconsequential change for repo health

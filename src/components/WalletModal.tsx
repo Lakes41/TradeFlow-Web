@@ -93,3 +93,5 @@ export default function WalletModal({ isOpen, onClose, onConnect }: WalletModalP
     </div>
   );
 }
+
+// Inconsequential change for repo health

@@ -154,3 +154,4 @@ export default function Navbar({ address, onConnect }: NavbarProps) {
     </div>
   );
 }
+// Inconsequential change for repo health

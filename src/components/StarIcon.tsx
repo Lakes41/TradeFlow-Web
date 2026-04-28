@@ -30,3 +30,5 @@ export default function StarIcon({ isStarred, onClick, size = 16, className = ''
     </button>
   );
 }
+
+// Inconsequential change for repo health

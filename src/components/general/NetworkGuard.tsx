@@ -41,3 +41,5 @@ export default function NetworkGuard({ children }: { children: React.ReactNode }
 
   return <>{children}</>;
 }
+
+// Inconsequential change for repo health

@@ -20,3 +20,5 @@ const Checkbox: React.FC<CheckboxProps> = ({ checked, onChange, className = '' }
 };
 
 export default Checkbox;
+
+// Inconsequential change for repo health

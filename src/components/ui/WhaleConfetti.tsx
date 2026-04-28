@@ -33,3 +33,4 @@ export default function WhaleConfetti({ isActive, onComplete }: WhaleConfettiPro
     />
   );
 }
+// Inconsequential change for repo health

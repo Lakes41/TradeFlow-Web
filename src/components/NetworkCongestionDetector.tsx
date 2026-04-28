@@ -54,3 +54,5 @@ export default function NetworkCongestionDetector() {
 
   return null; // This component is side-effect only
 }
+
+// Inconsequential change for repo health

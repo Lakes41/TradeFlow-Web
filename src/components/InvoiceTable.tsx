@@ -193,3 +193,5 @@ const InvoiceTable: React.FC<InvoiceTableProps> = ({ filters }) => {
 };
 
 export default InvoiceTable;
+
+// Inconsequential change for repo health
