@@ -9,7 +9,18 @@
     "lint": "node ./node_modules/eslint/bin/eslint.js .",
     "typecheck": "node ./node_modules/typescript/bin/tsc -p tsconfig.json --noEmit",
     "test": "node ./node_modules/jest/bin/jest.js",
-    "test:watch": "node ./node_modules/jest/bin/jest.js --watch"
+    "test:watch": "node ./node_modules/jest/bin/jest.js --watch",
+    "prepare": "husky",
+    "format": "prettier --write ."
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@creit.tech/stellar-wallets-kit": "^1.2.0",
@@ -53,8 +64,11 @@
     "@types/react": "^18",
     "eslint": "^9.0.0",
     "eslint-config-next": "^16.2.4",
+    "husky": "^9.1.7",
     "jest": "^30.1.3",
     "jest-environment-jsdom": "^30.1.2",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.8.4",
     "tailwind-scrollbar": "^4.0.2",
     "typescript": "^5"
   },
